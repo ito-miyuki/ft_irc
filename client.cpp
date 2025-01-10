@@ -12,6 +12,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h> // inet_addr
 #include <iostream>
 #include <unistd.h>
 #include <cstring> // strlen
@@ -33,11 +34,13 @@ int main() {
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(PORT);
 
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) {
-        perror("Invalid address");
-        close(clientSocket);
-        return 1;
-    }
+    in_addr_t result = inet_addr("127.0.0.1");
+	if (result == INADDR_NONE) {
+		std::cerr << "Invalid address" << std::endl;
+		return 1;
+	}
+	serverAddress.sin_addr.s_addr = result;
+
 
     // Step 3: Connect to server
     if (connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
