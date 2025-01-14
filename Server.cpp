@@ -19,6 +19,14 @@ Server& Server::operator=(const Server& other){
     return (*this);
 }
 
+// void Server::handleNickCommand(int clientSocket, const std::string& command) {
+//     // check any invalid case, empty, duplicated(same one is already in previous eleents)
+
+//     _clients[clientSocket] = 
+
+
+// }
+
 int Server::getPort() const {
     return (_port);
 }

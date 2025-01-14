@@ -17,12 +17,12 @@ int main(int argc, char** argv) {
 
     std::cout << "Port: " << port << std::endl; // for testing. delete it.
 
+    std::string password = argv[2]; // check if argv[2] password is in valid format
     try {
-        Server server(port, argv[2]); // check if argv[2] password is in valid format
-        server.runServer(&server);
+        Server server(port, password);
+        server.runServer();
     } catch (const std::exception& e) {
         std::cerr << "Server error: " << e.what() << std::endl;
     }
-
     return 0;
 }
