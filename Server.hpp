@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <poll.h> // for pol()
 
 // #include "Client.hpp"
 
@@ -11,6 +12,9 @@ class Server {
         std::string _password;
         // int _socketFd; // not in use yet
         // std::vector<Client> _clients; // client's info
+        // std::vector<Channel> _channels; // channel info
+        // bool _signal; // for signal handling
+		std::vector<pollfd> fds;
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password

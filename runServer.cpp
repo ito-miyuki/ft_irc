@@ -8,7 +8,6 @@
 #include <iostream>
 #include <cstring> // for memset
 #include <vector> // for vector
-#include <poll.h> // for pol()
 
 #define MAX_CLIENTS 100
 
@@ -82,7 +81,6 @@ int Server::runServer() {
 	std::cout << "Server listening on port: " << getPort() << std::endl;
 
 	// Step 5: set up Poll (Poll monitors/tracks multiple sockets)
-	std::vector<pollfd> fds; //pullfd is a struct
 	pollfd serverFd;
 	serverFd.fd = serverSocket; // serverSocket is waiting for client。
 	serverFd.events = POLLIN; // // Monitor for incoming connections
@@ -154,7 +152,7 @@ int Server::runServer() {
 					4. flags, it's usually 0
 				*/
 
-				if (byteRead < 0) { // <= or < ?
+				if (byteRead <= 0) {
 					//client disconnected
 					std::cout << "Client disconnected: " << fds[i].fd << std::endl;
 					close(fds[i].fd);
