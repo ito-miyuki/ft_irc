@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <poll.h> // for pol()
+#include <csignal>
 
 // #include "Client.hpp"
 
@@ -15,6 +16,7 @@ class Server {
         // std::vector<Channel> _channels; // channel info
         // bool _signal; // for signal handling
 		std::vector<pollfd> fds;
+        static bool _signal; // static is accessable without instance
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
@@ -23,7 +25,11 @@ class Server {
         Server& operator=(const Server& other);
 
         int runServer();
-        void handleNickCommand(int clientSocket, const std::string& command);
+        int createSocket();
+
+        static void setSignal(bool value);
+
+        // void handleNickCommand(int clientSocket, const std::string& command);
 
         int getPort() const;
 };

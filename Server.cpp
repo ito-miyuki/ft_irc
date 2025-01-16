@@ -19,6 +19,13 @@ Server& Server::operator=(const Server& other){
     return (*this);
 }
 
+bool Server::_signal = false;
+
+
+void Server::setSignal(bool value) {
+        _signal = value;
+}
+
 // void Server::handleNickCommand(int clientSocket, const std::string& command) {
 //     // check any invalid case, empty, duplicated(same one is already in previous eleents)
 
