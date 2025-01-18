@@ -6,9 +6,9 @@ void	Server::acceptNewClient()
 	struct pollfd		clientFd;
 	socklen_t			adLen = sizeof(address);
 	
-	std::cout << "server socket: " << _serverFd << std::endl;
+	std::cout << "server socket: " << getServerFd() << std::endl;
 
-	int clientSocket = accept(_serverFd, (struct sockaddr *)&(address), &adLen);
+	int clientSocket = accept(getServerFd(), (struct sockaddr *)&(address), &adLen);
 	if (clientSocket < 0) {
 		std::cerr << "Accept failed" << std::endl;
 		return ;

@@ -43,8 +43,9 @@ class Server {
         Server& operator=(const Server& other);
 
         int runServer();
-		int createSocket();
+		void setServerFd();
         void handleNickCommand(int clientSocket, const std::string& command);
 
         int getPort() const;
+        int getServerFd() {return _serverFd;}
 };
