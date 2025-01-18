@@ -2,9 +2,11 @@
 
 bool	Server::isRegistered(size_t clientIndex)
 {
-	for (size_t i = 0; i < _clientAmount; i++)
+	for (size_t i = 0; i < getClientAmount(); i++)
 	{
-		if (_clients[i].getFd() == _fds[clientIndex].fd)
+		std::cout << "this is fd" << _clients[0].getFd() << "compared to " << _fds.at(0).fd << std::endl;
+		if (_clients[i].getFd() == _fds.at(clientIndex).fd)
+		//if (_clients[i].getFd() == _fds[clientIndex].fd)
 		{
 			return (_clients[i].isRegistered());
 		}
@@ -15,17 +17,53 @@ bool	Server::isRegistered(size_t clientIndex)
 
 void	Server::registerPassword(Client& client, std::string arg)
 {
-	(void)arg;
-	(void)client;
+	if (arg.compare(0, 5, "PASS ") == 0) {
+		std::string pwd = arg.substr(5, std::string::npos);
+		if (pwd == getPassword()) {
+			// make a correct password message
+			client.setPassword(pwd);
+		} else	{
+			// handle error message and disconnecting
+		}
+	}
 }
+
+// cannot have the same nickname as anyone else
+void	Server::registerNickname(Client& client, std::string arg)
+{
+	if (arg.compare(0, 5, "NICK ") == 0) {
+		std::string nick = arg.substr(5, std::string::npos);
+		if (!nick.empty()) {
+			// make an input validation
+			client.setNickname(nick);
+		} else	{
+			// handle error message and ask again
+		}
+	}
+}
+
+// can have the same username as someone else
+void	Server::registerUser(Client& client, std::string arg)
+{
+	if (arg.compare(0, 5, "USER ") == 0) {
+		std::string user = arg.substr(5, std::string::npos);
+		if (!user.empty()) {
+			// make a correct password message
+			client.setUsername(user);
+		} else	{
+			// handle error message and ask again
+		}
+	}
+}
+
 void	Server::authenticate(Client &client, std::string arg)
 {
 	if (client.getPassword().empty())
 		registerPassword(client, arg);
 	if (client.getNick().empty())
-		//registerNickname(client, arg);
+		registerNickname(client, arg);
 	if (client.getUser().empty())
-		//registerUser(client, arg);
+		registerUser(client, arg);
 	if (!client.getPassword().empty() && !client.getNick().empty() && !client.getUser().empty())
 	{
 		// send welcome message
@@ -35,7 +73,7 @@ void	Server::authenticate(Client &client, std::string arg)
 
 void	Server::registerClient(size_t clientIndex, std::string arg)
 {
-	for (size_t i = 0; i < _clientAmount; i++)
+	for (size_t i = 0; i < getClientAmount(); i++) 
 	{
 		if (_clients[i].getFd() == _fds[clientIndex].fd)
 		{
@@ -49,7 +87,6 @@ void	Server::processInputData(std::stringstream &ss, size_t clientIndex)
 {
 	std::string	arg;
 
-	(void)clientIndex;
 	while (getline(ss, arg))
 	{
 		std::cout <<  "this is our arg =" << arg << std::endl;
@@ -57,10 +94,10 @@ void	Server::processInputData(std::stringstream &ss, size_t clientIndex)
 			continue ;
 		if (!arg.empty() && arg.back() == '\r')
 			arg.pop_back();
-		/* if (!isRegistered(clientIndex))
+		if (!isRegistered(clientIndex))
 		{
 			registerClient(clientIndex, arg);
-		} */
+		}
 	}
 }
 

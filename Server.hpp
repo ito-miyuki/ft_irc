@@ -35,6 +35,10 @@ class Server {
 		void	authenticate(Client &client, std::string arg);
 
 		void	registerPassword(Client& client, std::string arg);
+        void	registerNickname(Client& client, std::string arg);
+        void    registerUser(Client& client, std::string arg);
+
+
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
@@ -44,8 +48,12 @@ class Server {
 
         int runServer();
 		void setServerFd();
-        void handleNickCommand(int clientSocket, const std::string& command);
+        void    incrementClientAmount() {_clientAmount++;}
+        void    decrementClientAmount();
+        //void handleNickCommand(int clientSocket, const std::string& command); EDIT: probably dont need
 
+        std::string getPassword() {return _password;}
         int getPort() const;
         int getServerFd() {return _serverFd;}
+        size_t  getClientAmount() {return _clientAmount;}
 };

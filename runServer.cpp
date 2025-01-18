@@ -22,7 +22,7 @@ int Server::runServer() {
 	struct sockaddr_in serverAddress; // Struct to hold server address information
     memset(&serverAddress, 0, sizeof(serverAddress)); // Zero out the memory for the struct
     serverAddress.sin_family = AF_INET; // Set to IPv4
-    serverAddress.sin_port = htons(_port); // Convert the port number to network byte order
+    serverAddress.sin_port = htons(getPort()); // Convert the port number to network byte order
     serverAddress.sin_addr.s_addr = INADDR_ANY; // Allow connections from any network interface
 
 	if (bind(getServerFd(), (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
@@ -57,7 +57,7 @@ int Server::runServer() {
 			break;
 		}
 		
-		for (size_t i = 0; i < _fds.size(); ++i) {
+		for (size_t i = 0; i < _fds.size(); i++) {
 
 			if (_fds[i].revents & POLLIN)
 			{
@@ -66,6 +66,7 @@ int Server::runServer() {
 					acceptNewClient();
 				}
 				else {
+					std::cout << "pci server socket before: " << getServerFd() << std::endl;
 					processClientInput(&i);
 				}
 			}
@@ -75,6 +76,6 @@ int Server::runServer() {
 	for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it) {
 		close(it->fd);
 	}
-	close(_serverFd);
+	close(getServerFd());
 	return 0;
 }

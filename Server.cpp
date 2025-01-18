@@ -19,6 +19,12 @@ Server& Server::operator=(const Server& other){
     return (*this);
 }
 
+void    Server::decrementClientAmount() {
+    if (_clientAmount == 0)
+        return ;
+    _clientAmount--;
+}
+  
 // void Server::handleNickCommand(int clientSocket, const std::string& command) {
 //     // check any invalid case, empty, duplicated(same one is already in previous eleents)
 

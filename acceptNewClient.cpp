@@ -26,7 +26,7 @@ void	Server::acceptNewClient()
 	clientFd.events = POLLIN; // Monitor for incoming data from this client
 	clientFd.revents = 0;
 
-	if (_clientAmount == MAX_CLIENTS) {
+	if (getClientAmount() == MAX_CLIENTS) {
 		std::cerr << "Client amount exceeded" << std::endl;
 		return ;
 	}
@@ -35,7 +35,7 @@ void	Server::acceptNewClient()
 
 	_clients.push_back(newClient);
 	_fds.push_back(clientFd);
-	_clientAmount++;
+	incrementClientAmount();
 }
 
 

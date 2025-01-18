@@ -26,5 +26,9 @@ class Client {
 		std::string	getUser() {return _username;}
 		void		setAsRegistered() {_isRegistered = true;}
 
+        void        setPassword(std::string password) {_password = password;}
+        void        setNickname(std::string nick) {_nickname = nick;}
+        void        setUsername(std::string user) {_username = user;}
+        void        setFd(int fd) {_fd = fd;}
 
 };
