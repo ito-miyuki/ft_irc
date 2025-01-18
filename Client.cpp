@@ -1,8 +1,7 @@
 #include "Client.hpp"
 
-Client::Client(int port, std::string password){
-    // init some private attribute here
-}
+Client::Client(int fd, std::string ipAddress) : _ipA(ipAddress), _isRegistered(false), _fd(fd)
+{}
 
 Client::~Client(){
     // anytging to delete?

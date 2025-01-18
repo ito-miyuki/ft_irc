@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
         port = std::stoi(argv[1]); // add more specific error here
     } catch (const std::exception& e) {
         std::cerr << "Invalid port: " << e.what() << std::endl;
+		return 1;
     }
 
     std::cout << "Port: " << port << std::endl; // for testing. delete it.
@@ -23,6 +24,7 @@ int main(int argc, char** argv) {
         server.runServer();
     } catch (const std::exception& e) {
         std::cerr << "Server error: " << e.what() << std::endl;
+		return 1;
     }
     return 0;
 }
