@@ -14,16 +14,19 @@ class Client {
         // std::vector<Channel> jointChannels; // channels user is part of
         // std::vector<Channel> opChannels; // channels where user is the moderator
     public:
+		//Client();
 		Client(int fd, std::string ipAddress);
         ~Client();
         Client(const Client& other);
         Client& operator=(const Client& other);
 
-		int			getFd() {return _fd;}
-		bool		isRegistered() {return _isRegistered;}
-		std::string	getPassword() {return _password;}
-		std::string	getNick() {return _nickname;}
-		std::string	getUser() {return _username;}
+		int			getFd() const {return _fd;}
+		bool		isRegistered() const {return _isRegistered;}
+		std::string	getPassword() const {return _password;}
+		std::string	getNick() const {return _nickname;}
+		std::string	getUser() const {return _username;}
+		std::string	getIPa() const {return _ipA;}
+
 		void		setAsRegistered() {_isRegistered = true;}
 
         void        setPassword(std::string password) {_password = password;}

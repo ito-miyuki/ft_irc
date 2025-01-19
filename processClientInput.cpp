@@ -1,15 +1,26 @@
 #include "Server.hpp"
 
-bool	Server::isRegistered(size_t clientIndex)
+/* bool	Server::isRegistered(size_t clientIndex)
 {
 	for (size_t i = 0; i < getClientAmount(); i++)
 	{
 		std::cout << "this is fd" << _clients[0].getFd() << "compared to " << _fds.at(0).fd << std::endl;
-		if (_clients[i].getFd() == _fds.at(clientIndex).fd)
-		//if (_clients[i].getFd() == _fds[clientIndex].fd)
+		if (_clients[i].getFd() == _fds[clientIndex].fd)
 		{
 			return (_clients[i].isRegistered());
 		}
+	}
+	std::cerr << "You have done the impossible (8" << std::endl;
+	return (false);
+} */
+
+bool	Server::isRegistered(int cfd)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
+	{
+		std::cout << "this is fd " << it->getFd() << " compared to " << cfd << std::endl;
+		if (it->getFd() == cfd)
+			return (it->isRegistered());
 	}
 	std::cerr << "You have done the impossible (8" << std::endl;
 	return (false);
@@ -71,7 +82,7 @@ void	Server::authenticate(Client &client, std::string arg)
 	}
 }
 
-void	Server::registerClient(size_t clientIndex, std::string arg)
+/* void	Server::registerClient(size_t clientIndex, std::string arg)
 {
 	for (size_t i = 0; i < getClientAmount(); i++) 
 	{
@@ -81,9 +92,21 @@ void	Server::registerClient(size_t clientIndex, std::string arg)
 			return ;
 		}
 	}
+} */
+
+void	Server::registerClient(int cfd, std::string arg)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
+	{
+		if (it->getFd() == cfd)
+		{
+			authenticate(*it, arg);
+			return ;
+		}
+	}
 }
 
-void	Server::processInputData(std::stringstream &ss, size_t clientIndex)
+/* void	Server::processInputData(std::stringstream &ss, size_t clientIndex)
 {
 	std::string	arg;
 
@@ -99,10 +122,44 @@ void	Server::processInputData(std::stringstream &ss, size_t clientIndex)
 			registerClient(clientIndex, arg);
 		}
 	}
+} */
+
+void	Server::processInputData(std::stringstream &ss, int cfd)
+{
+	std::string	arg;
+
+	while (getline(ss, arg))
+	{
+		std::cout <<  "this is our arg =" << arg << std::endl;
+		if (arg.empty())
+			continue ;
+		if (!arg.empty() && arg.back() == '\r')
+			arg.pop_back();
+		if (!isRegistered(cfd))
+		{
+			registerClient(cfd, arg);
+		}
+	}
 }
 
+void	Server::processClientInput(size_t *clientIndex, int cfd)
+{
+	char buffer[1024] = {0};
+	int byteRead = recv(cfd, buffer, sizeof(buffer), 0);
 
-void	Server::processClientInput(size_t *clientIndex)
+	if (byteRead <= 0) {
+		std::cout << "Client disconnected: " << cfd << std::endl;
+		close(cfd);
+		_fds.erase(_fds.begin() + *clientIndex);
+		(*clientIndex)--; // Adjust the loop index due to the removal
+		decrementClientAmount();
+		return ;
+	}
+	
+	std::stringstream	ss(buffer);
+	processInputData(ss, cfd);
+}
+/* void	Server::processClientInput(size_t *clientIndex)
 {
 	char buffer[1024] = {0};
 	int byteRead = recv(_fds[*clientIndex].fd, buffer, sizeof(buffer), 0);
@@ -112,12 +169,13 @@ void	Server::processClientInput(size_t *clientIndex)
 		close(_fds[*clientIndex].fd);
 		_fds.erase(_fds.begin() + *clientIndex);
 		(*clientIndex)--; // Adjust the loop index due to the removal
+		decrementClientAmount();
 		return ;
 	}
 	
 	std::stringstream	ss(buffer);
 	processInputData(ss, *clientIndex);
-}
+} */
 
 	//send(_fds[clientIndex].fd, buffer, byteRead, 0);
 

@@ -28,10 +28,14 @@ class Server {
 		size_t	_clientAmount;
 
 		void	acceptNewClient();
-		void	processClientInput(size_t *clientIndex);
-		bool	isRegistered(size_t clientIndex);
-		void	registerClient(size_t clientIndex, std::string arg);
-		void	processInputData(std::stringstream &ss, size_t clientIndex);
+		//void	processClientInput(size_t *clientIndex);
+		void	processClientInput(size_t *clientIndex, int cfd);
+		//bool	isRegistered(size_t clientIndex);
+		bool	isRegistered(int cfd);
+		//void	registerClient(size_t clientIndex, std::string arg);
+		void	registerClient(int cfd, std::string arg);
+		//void	processInputData(std::stringstream &ss, size_t clientIndex);
+		void	processInputData(std::stringstream &ss, int cfd);
 		void	authenticate(Client &client, std::string arg);
 
 		void	registerPassword(Client& client, std::string arg);
@@ -46,14 +50,16 @@ class Server {
         Server(const Server& other);
         Server& operator=(const Server& other);
 
-        int runServer();
-		void setServerFd();
-        void    incrementClientAmount() {_clientAmount++;}
-        void    decrementClientAmount();
-        //void handleNickCommand(int clientSocket, const std::string& command); EDIT: probably dont need
+        int		runServer();
+		void	setServerFd();
+        void	incrementClientAmount() {_clientAmount++;}
+        void	decrementClientAmount();
 
-        std::string getPassword() {return _password;}
-        int getPort() const;
-        int getServerFd() {return _serverFd;}
-        size_t  getClientAmount() {return _clientAmount;}
+        std::string	getPassword() {return _password;}
+        int			getPort() const;
+        int			getServerFd() {return _serverFd;}
+        size_t 		getClientAmount() {return _clientAmount;}
+
+		void		addClient(const Client &client) {_clients.push_back(client);}
+		Client		&getClient(int fd);
 };

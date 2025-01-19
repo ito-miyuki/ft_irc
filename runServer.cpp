@@ -7,7 +7,7 @@ void Server::setServerFd(){
 
 int Server::runServer() {
 
-	setServerFd();
+	setServerFd(); // EDIT: had to change for debugging purposes
 	if (getServerFd() == -1) {
 		std::cerr << "Failed to create socket." << std::endl;
 		return 1;
@@ -19,6 +19,7 @@ int Server::runServer() {
 		close(getServerFd());
 		return 1;
 	}
+	
 	struct sockaddr_in serverAddress; // Struct to hold server address information
     memset(&serverAddress, 0, sizeof(serverAddress)); // Zero out the memory for the struct
     serverAddress.sin_family = AF_INET; // Set to IPv4
@@ -62,12 +63,11 @@ int Server::runServer() {
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == getServerFd()) {
-					std::cout << "server socket before: " << getServerFd() << std::endl;
 					acceptNewClient();
 				}
 				else {
-					std::cout << "pci server socket before: " << getServerFd() << std::endl;
-					processClientInput(&i);
+					processClientInput(&i, _fds[i].fd);
+					//processClientInput(&i);
 				}
 			}
 		}

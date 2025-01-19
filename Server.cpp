@@ -24,15 +24,19 @@ void    Server::decrementClientAmount() {
         return ;
     _clientAmount--;
 }
-  
-// void Server::handleNickCommand(int clientSocket, const std::string& command) {
-//     // check any invalid case, empty, duplicated(same one is already in previous eleents)
-
-//     _clients[clientSocket] = 
-
-
-// }
 
 int Server::getPort() const {
     return (_port);
+}
+
+Client	&Server::getClient(int fd)
+{
+	std::vector<Client>::iterator end = _clients.end();
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
+	{
+		if (it->getFd() == fd)
+			return (*it);
+	}
+	std::cout << "Couldn't find client" << std::endl;
+	return (*end);
 }

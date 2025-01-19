@@ -6,8 +6,6 @@ void	Server::acceptNewClient()
 	struct pollfd		clientFd;
 	socklen_t			adLen = sizeof(address);
 	
-	std::cout << "server socket: " << getServerFd() << std::endl;
-
 	int clientSocket = accept(getServerFd(), (struct sockaddr *)&(address), &adLen);
 	if (clientSocket < 0) {
 		std::cerr << "Accept failed" << std::endl;
@@ -33,7 +31,7 @@ void	Server::acceptNewClient()
 	
 	Client	newClient(clientSocket, inet_ntoa((address.sin_addr)));
 
-	_clients.push_back(newClient);
+	addClient(newClient);
 	_fds.push_back(clientFd);
 	incrementClientAmount();
 }
