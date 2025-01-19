@@ -27,6 +27,19 @@ class Server {
 		std::vector<pollfd> _fds;
 		size_t	_clientAmount;
 
+		enum	Command {
+				KICK,
+				INVITE,
+				TOPIC,
+				MODE,
+				JOIN,
+				PRIVMSG,
+				NICK,
+				PING,
+				QUIT,
+				FAIL
+		};
+
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
 		bool	isRegistered(int cfd);
@@ -41,7 +54,10 @@ class Server {
 		void	eraseClient(int cfd);
 		bool	isUniqueNick(std::string nick);
 
+		void	runCommand(int cfd, std::string arg);
+		void	updateNick(int cfd, std::string arg);
 
+		Server::Command	identifyCommand(std::string command);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password

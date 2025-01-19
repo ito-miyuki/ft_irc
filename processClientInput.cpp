@@ -29,6 +29,10 @@ void	Server::processInputData(std::stringstream &ss, int cfd)
 		{
 			registerClient(cfd, arg);
 		}
+		else
+		{
+			runCommand(cfd, arg);
+		}
 	}
 }
 

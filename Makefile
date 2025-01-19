@@ -12,7 +12,9 @@ SOURCES := main.cpp\
 			Client.cpp\
 			acceptNewClient.cpp\
 			processClientInput.cpp\
-			registerClient.cpp
+			registerClient.cpp\
+			runCommands.cpp\
+			updateNick.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
