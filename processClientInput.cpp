@@ -1,24 +1,9 @@
 #include "Server.hpp"
 
-/* bool	Server::isRegistered(size_t clientIndex)
-{
-	for (size_t i = 0; i < getClientAmount(); i++)
-	{
-		std::cout << "this is fd" << _clients[0].getFd() << "compared to " << _fds.at(0).fd << std::endl;
-		if (_clients[i].getFd() == _fds[clientIndex].fd)
-		{
-			return (_clients[i].isRegistered());
-		}
-	}
-	std::cerr << "You have done the impossible (8" << std::endl;
-	return (false);
-} */
-
 bool	Server::isRegistered(int cfd)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
 	{
-		std::cout << "this is fd " << it->getFd() << " compared to " << cfd << std::endl;
 		if (it->getFd() == cfd)
 			return (it->isRegistered());
 	}
@@ -31,12 +16,27 @@ void	Server::registerPassword(Client& client, std::string arg)
 	if (arg.compare(0, 5, "PASS ") == 0) {
 		std::string pwd = arg.substr(5, std::string::npos);
 		if (pwd == getPassword()) {
-			// make a correct password message
+			std::string msg = "Password accepted.\n";
+			send(client.getFd(), msg.c_str(), msg.length(), 0);
 			client.setPassword(pwd);
 		} else	{
-			// handle error message and disconnecting
+			std::string msg = "ERROR: Incorrect password. Connection closed.\n"; // double checking needed
+			send(client.getFd(), msg.c_str(), msg.length(), 0);
+			close(client.getFd());
+			std::cerr << "Client provided an incorrect password. Connection terminated." << std::endl; // double checking needed
+			eraseClient(client.getFd());
 		}
 	}
+}
+
+bool	Server::isUniqueNick(std::string nick)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
+	{
+		if (it->getNick() == nick)
+			return false;
+	}
+	return true;
 }
 
 // cannot have the same nickname as anyone else
@@ -44,12 +44,16 @@ void	Server::registerNickname(Client& client, std::string arg)
 {
 	if (arg.compare(0, 5, "NICK ") == 0) {
 		std::string nick = arg.substr(5, std::string::npos);
-		if (!nick.empty()) {
-			// make an input validation
-			client.setNickname(nick);
-		} else	{
-			// handle error message and ask again
+		int	nickCount = 1;
+
+		std::string newNick = nick;
+		while (!isUniqueNick(newNick))
+		{
+			newNick = nick + std::to_string(nickCount);
+			nickCount++;
 		}
+		client.setNickname(newNick);
+		std::cout << "User's nickname: " << client.getNick() << std::endl;
 	}
 }
 
@@ -58,12 +62,14 @@ void	Server::registerUser(Client& client, std::string arg)
 {
 	if (arg.compare(0, 5, "USER ") == 0) {
 		std::string user = arg.substr(5, std::string::npos);
-		if (!user.empty()) {
-			// make a correct password message
-			client.setUsername(user);
-		} else	{
-			// handle error message and ask again
+		size_t divider = user.find(' ');
+		if (divider != std::string::npos)
+		{
+			client.setUsername(user.substr(0, divider));
+			std::cout << "User's username: " << client.getUser() << std::endl;
 		}
+		else
+			std::cerr << "Failed to find username" << std::endl;
 	}
 }
 
@@ -77,22 +83,11 @@ void	Server::authenticate(Client &client, std::string arg)
 		registerUser(client, arg);
 	if (!client.getPassword().empty() && !client.getNick().empty() && !client.getUser().empty())
 	{
-		// send welcome message
+		std::string msg = ":ft_irc 001 " + client.getUser() + " :Welcome to the IRC Network, " + client.getNick() + "!\r\n"; // double checking needed
+		send(client.getFd(), msg.c_str(), msg.length(), 0);
 		client.setAsRegistered();
 	}
 }
-
-/* void	Server::registerClient(size_t clientIndex, std::string arg)
-{
-	for (size_t i = 0; i < getClientAmount(); i++) 
-	{
-		if (_clients[i].getFd() == _fds[clientIndex].fd)
-		{
-			authenticate(_clients[i], arg);
-			return ;
-		}
-	}
-} */
 
 void	Server::registerClient(int cfd, std::string arg)
 {
@@ -100,29 +95,11 @@ void	Server::registerClient(int cfd, std::string arg)
 	{
 		if (it->getFd() == cfd)
 		{
-			authenticate(*it, arg);
+			authenticate(*it, arg); // if something sketchy happens, check this call
 			return ;
 		}
 	}
 }
-
-/* void	Server::processInputData(std::stringstream &ss, size_t clientIndex)
-{
-	std::string	arg;
-
-	while (getline(ss, arg))
-	{
-		std::cout <<  "this is our arg =" << arg << std::endl;
-		if (arg.empty())
-			continue ;
-		if (!arg.empty() && arg.back() == '\r')
-			arg.pop_back();
-		if (!isRegistered(clientIndex))
-		{
-			registerClient(clientIndex, arg);
-		}
-	}
-} */
 
 void	Server::processInputData(std::stringstream &ss, int cfd)
 {
@@ -130,7 +107,7 @@ void	Server::processInputData(std::stringstream &ss, int cfd)
 
 	while (getline(ss, arg))
 	{
-		std::cout <<  "this is our arg =" << arg << std::endl;
+		std::cout <<  "this is our arg = <" << arg << ">" << std::endl;
 		if (arg.empty())
 			continue ;
 		if (!arg.empty() && arg.back() == '\r')
@@ -142,6 +119,20 @@ void	Server::processInputData(std::stringstream &ss, int cfd)
 	}
 }
 
+void	Server::eraseClient(int cfd)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
+	{
+		if (it->getFd() == cfd)
+		{
+			_clients.erase(it);
+			decrementClientAmount();
+			return ;
+		}
+	}
+	std::cerr << "Could not erase client, check your code motherfuckers" << std::endl;
+}
+
 void	Server::processClientInput(size_t *clientIndex, int cfd)
 {
 	char buffer[1024] = {0};
@@ -151,31 +142,14 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 		std::cout << "Client disconnected: " << cfd << std::endl;
 		close(cfd);
 		_fds.erase(_fds.begin() + *clientIndex);
+		eraseClient(cfd);
 		(*clientIndex)--; // Adjust the loop index due to the removal
-		decrementClientAmount();
 		return ;
 	}
 	
 	std::stringstream	ss(buffer);
 	processInputData(ss, cfd);
 }
-/* void	Server::processClientInput(size_t *clientIndex)
-{
-	char buffer[1024] = {0};
-	int byteRead = recv(_fds[*clientIndex].fd, buffer, sizeof(buffer), 0);
-
-	if (byteRead <= 0) {
-		std::cout << "Client disconnected: " << _fds[*clientIndex].fd << std::endl;
-		close(_fds[*clientIndex].fd);
-		_fds.erase(_fds.begin() + *clientIndex);
-		(*clientIndex)--; // Adjust the loop index due to the removal
-		decrementClientAmount();
-		return ;
-	}
-	
-	std::stringstream	ss(buffer);
-	processInputData(ss, *clientIndex);
-} */
 
 	//send(_fds[clientIndex].fd, buffer, byteRead, 0);
 

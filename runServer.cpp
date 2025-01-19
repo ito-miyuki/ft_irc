@@ -67,7 +67,6 @@ int Server::runServer() {
 				}
 				else {
 					processClientInput(&i, _fds[i].fd);
-					//processClientInput(&i);
 				}
 			}
 		}
