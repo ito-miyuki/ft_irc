@@ -11,7 +11,8 @@ SOURCES := main.cpp\
 			Server.cpp\
 			Client.cpp\
 			acceptNewClient.cpp\
-			processClientInput.cpp
+			processClientInput.cpp\
+			registerClient.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
