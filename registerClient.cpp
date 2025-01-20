@@ -39,7 +39,7 @@ bool	Server::isUniqueNick(std::string nick)
 	return true;
 }
 
-// cannot have the same nickname as anyone else
+// cannot have the same nickname as anyone else | misses capital letter check!!!
 void	Server::registerNickname(Client& client, std::string arg)
 {
 	if (arg.compare(0, 5, "NICK ") == 0) {

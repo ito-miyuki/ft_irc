@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h> // for inet_ntoa()
 #include <sstream>
+#include <regex>
 
 #define MAX_CLIENTS 100
 

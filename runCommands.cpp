@@ -54,7 +54,8 @@ void	Server::runCommand(int cfd, std::string arg)
 			//pingMyPong();
 		case 8:
 			//imSoDONE();
-		default:
+		default :
+			std::cout << "It doesn't let me compile without this" << std::endl;
 			// unknown command, also errors will go here....?
 	}
 }
