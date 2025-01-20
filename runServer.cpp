@@ -15,10 +15,10 @@
 static void handleSignal(int signal){
 	switch (signal) {
 		case SIGINT:
-			std::cout << "SIGINT recieved. Shutting down gracefully..." << std::endl;
+			std::cout << "SIGINT recieved.\nShutting down gracefully..." << std::endl;
 			break;
 		case SIGQUIT:
-			std::cout << "SIGQUIT recieved. Shutting down gracefully..." << std::endl; // different message?
+			std::cout << "SIGQUIT recieved.\nTerminating process..." << std::endl;
 			break;
 		default:
 			break;
@@ -37,10 +37,10 @@ int Server::createSocket(){
 
 int Server::runServer() {
 
-	// handle signal here
+	// handle signal here. How much should we handle? Is this enough?
 	signal(SIGINT, handleSignal); // ctrl + c
-	signal(SIGQUIT, handleSignal); // ctrl + \
-	signal(SIGTERM, handleSignal); // kill <PID>
+	signal(SIGQUIT, handleSignal); // 'ctrl + \'
+	signal(SIGTERM, handleSignal); // kill <PID> // this might not needed.
 
 	// create server socket
 	int serverSocket = createSocket();
