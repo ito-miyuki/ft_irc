@@ -8,7 +8,13 @@ HEADERS := Server.hpp Client.hpp Channel.hpp
 
 SOURCES := main.cpp\
 			runServer.cpp\
-			Server.cpp
+			Server.cpp\
+			Client.cpp\
+			acceptNewClient.cpp\
+			processClientInput.cpp\
+			registerClient.cpp\
+			runCommands.cpp\
+			updateNick.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
