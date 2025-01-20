@@ -11,6 +11,7 @@
 #include <arpa/inet.h> // for inet_ntoa()
 #include <sstream>
 #include <regex>
+#include <csignal>
 
 #define MAX_CLIENTS 100
 
@@ -27,6 +28,7 @@ class Server {
         // bool _signal; // for signal handling
 		std::vector<pollfd> _fds;
 		size_t	_clientAmount;
+		static bool _signal; // static is accessable without instance
 
 		enum	Command {
 				KICK,
@@ -78,4 +80,6 @@ class Server {
 
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		Client		&getClient(int fd);
+
+		static void setSignal(bool value); // is this a correct place to put?
 };

@@ -1,11 +1,31 @@
 #include "Server.hpp"
 
+// this cannot be Server class member function
+static void handleSignal(int signal){
+	switch (signal) {
+		case SIGINT:
+			std::cout << "SIGINT recieved.\nShutting down gracefully..." << std::endl;
+			break;
+		case SIGQUIT:
+			std::cout << "SIGQUIT recieved.\nTerminating process..." << std::endl;
+			break;
+		default:
+			break;
+	}
+	Server::setSignal(true);
+}
+
 void Server::setServerFd(){
 
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 }
 
 int Server::runServer() {
+
+	// handle signal here. How much should we handle? Is this enough?
+	signal(SIGINT, handleSignal); // ctrl + c
+	signal(SIGQUIT, handleSignal); // 'ctrl + \'
+	signal(SIGTERM, handleSignal); // kill <PID> // this might not needed.
 
 	setServerFd(); // EDIT: had to change for debugging purposes
 	if (getServerFd() == -1) {
@@ -46,7 +66,7 @@ int Server::runServer() {
 	serverFd.revents = 0; // EDIT: added revents to fill struct fields
     _fds.push_back(serverFd); // Add the server socket to the list of monitored sockets
 
-	while (true) { // while we don't recieve signal
+	while (!_signal) { // while we don't recieve signal. juts True also worked.
 		int pollCount = poll(_fds.data(), _fds.size(), -1);
 		
 		if (pollCount < 0) {

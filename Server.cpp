@@ -40,3 +40,9 @@ Client	&Server::getClient(int fd)
 	std::cout << "Couldn't find client" << std::endl;
 	return (*end);
 }
+
+bool Server::_signal = false;
+
+void Server::setSignal(bool value) {
+        _signal = value;
+}
