@@ -14,7 +14,8 @@ SOURCES := main.cpp\
 			processClientInput.cpp\
 			registerClient.cpp\
 			runCommands.cpp\
-			nick.cpp
+			nick.cpp\
+			join.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
