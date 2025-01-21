@@ -19,11 +19,11 @@ void	Server::nick(int cfd, std::string arg)
 	}
 	if (newNick.empty())
 	{
-		std::string msg = ":ft_irc 431 " + getClient(cfd).getUser() + " :No nickname given\r\n";
-		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+		std::string msg = ":ft_irc 431 " + getClient(cfd)->getUser() + " :No nickname given\r\n";
+		send(getClient(cfd)->getFd(), msg.c_str(), msg.length(), 0);
 		return ;
 	}
-	else if (getClient(cfd).getNick().compare(newNick) == 0)
+	else if (getClient(cfd)->getNick().compare(newNick) == 0)
 	{}
 	else
 	{
@@ -35,15 +35,15 @@ void	Server::nick(int cfd, std::string arg)
 		if (std::regex_match(newNick, incorrect))
 		{
 			std::string msg = ":ft_irc 432 " + newNick + " :Erroneus nickname\r\n";
-			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+			send(getClient(cfd)->getFd(), msg.c_str(), msg.length(), 0);
 		}
 		else
 		{
 			if (isUniqueNick(newNick))
 			{
-				std::string msg = ":" + getClient(cfd).getNick() + "!" + getClient(cfd).getUser() + "@" + getClient(cfd).getIPa() + " NICK " + newNick + " \r\n";
-				send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
-				getClient(cfd).setNickname(newNick);
+				std::string msg = ":" + getClient(cfd)->getNick() + "!" + getClient(cfd)->getUser() + "@" + getClient(cfd)->getIPa() + " NICK " + newNick + " \r\n";
+				send(getClient(cfd)->getFd(), msg.c_str(), msg.length(), 0);
+				getClient(cfd)->setNickname(newNick);
 
 			}
 			else
@@ -51,7 +51,7 @@ void	Server::nick(int cfd, std::string arg)
 				//std::string msg = ":ft_irc 433 " + newNick + " \r\n";
 				std::string msg = ":ft_irc 433 \r\n";
 				//std::string msg = ":ft_irc 433 " + getClient(cfd).getNick() + " " + newNick + " \r\n";
-				send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+				send(getClient(cfd)->getFd(), msg.c_str(), msg.length(), 0);
 			}
 		}
 	} 
