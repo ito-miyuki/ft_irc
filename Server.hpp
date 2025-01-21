@@ -58,7 +58,7 @@ class Server {
 		bool	isUniqueNick(std::string nick);
 
 		void	runCommand(int cfd, std::string arg);
-		void	updateNick(int cfd, std::string arg);
+		void	nick(int cfd, std::string arg);
 
 		Server::Command	identifyCommand(std::string command);
 

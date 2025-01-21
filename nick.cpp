@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void	Server::updateNick(int cfd, std::string arg)
+void	Server::nick(int cfd, std::string arg)
 {
 	std::stringstream	ss(arg);
 	std::string			substr;
@@ -40,10 +40,17 @@ void	Server::updateNick(int cfd, std::string arg)
 		else
 		{
 			if (isUniqueNick(newNick))
+			{
+				std::string msg = ":" + getClient(cfd).getNick() + "!" + getClient(cfd).getUser() + "@" + getClient(cfd).getIPa() + " NICK " + newNick + " \r\n";
+				send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 				getClient(cfd).setNickname(newNick);
+
+			}
 			else
 			{
-				std::string msg = ":ft_irc 433 " + newNick + " \r\n";
+				//std::string msg = ":ft_irc 433 " + newNick + " \r\n";
+				std::string msg = ":ft_irc 433 \r\n";
+				//std::string msg = ":ft_irc 433 " + getClient(cfd).getNick() + " " + newNick + " \r\n";
 				send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 			}
 		}

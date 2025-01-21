@@ -49,7 +49,7 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 5:
 			//slideIntoMyDMs();
 		case 6:
-			return (updateNick(cfd, arg));
+			return (nick(cfd, arg));
 		case 7:
 			//pingMyPong();
 		case 8:
