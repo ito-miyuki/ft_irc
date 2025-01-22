@@ -60,6 +60,7 @@ class Server {
 		void	runCommand(int cfd, std::string arg);
 		void	updateNick(int cfd, std::string arg);
 
+		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
 
     public:

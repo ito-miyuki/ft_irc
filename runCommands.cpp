@@ -51,7 +51,7 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 6:
 			return (updateNick(cfd, arg));
 		case 7:
-			//pingMyPong();
+			return (pingMyPong(cfd, arg));
 		case 8:
 			//imSoDONE();
 		default :
