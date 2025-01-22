@@ -11,30 +11,21 @@
     49152 ～ 65535: dynamic/private ports.
             Typically used by operating systems for short-lived client connections, leading to potential conflicts.
 */
+
 bool isPortValid(const std::string& port) {
 
     if (port.empty()) {
         return false;
     }
 
-    // only for over cpp+11
-    for (char c : port) {
-        if (!std::isdigit(c)) {
-            std::cerr << "Port cannot contain non digit character" << std::endl; // you may delete it 
-            return false;
-        }
-    }
-
     int portNum;
     try {
         portNum = std::stoi(port);
     } catch (const std::exception& e) {
-        std::cerr << "Invalid port, from portNum: " << e.what() << std::endl; // change the message 
 		return false;
     }
     
-    if (portNum < 0 || portNum > 65535){
-        std::cerr << "Port number is out of ranges" << std::endl; // you may delete it 
+    if (portNum < 1024 || portNum > 49151){
         return false;
     }
     return true;
@@ -47,20 +38,13 @@ int main(int argc, char** argv) {
     }
 
     if (!isPortValid(argv[1])) {
-        std::cerr << "Port '" << argv[1] << "' is invalid." << std::endl;
-    }
-    int port;
-
-    try {
-        port = std::stoi(argv[1]); // add more specific error here
-    } catch (const std::exception& e) {
-        std::cerr << "Invalid port: " << e.what() << std::endl;
-		return 1;
+        std::cerr << "Port " << argv[1] << " is invalid." << std::endl;
+        return 1;
     }
 
-    std::cout << "Port: " << port << std::endl; // for testing. delete it.
+    int port = port = std::stoi(argv[1]);
 
-    std::string password = argv[2]; // check if argv[2] password is in valid format
+    std::string password = argv[2];
     try {
         Server server(port, password);
         server.runServer();
