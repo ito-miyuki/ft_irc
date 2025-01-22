@@ -10,11 +10,13 @@ SOURCES := main.cpp\
 			runServer.cpp\
 			Server.cpp\
 			Client.cpp\
+			Channel.cpp\
 			acceptNewClient.cpp\
 			processClientInput.cpp\
 			registerClient.cpp\
 			runCommands.cpp\
-			updateNick.cpp\
+			nick.cpp\
+			join.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

@@ -45,13 +45,13 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 3:
 			//changeMyModesBaby();
 		case 4:
-			//forGroupies() join;
+			return (join(cfd, arg));
 		case 5:
 			//slideIntoMyDMs();
 		case 6:
-			return (updateNick(cfd, arg));
+			return (nick(cfd, arg));
 		case 7:
-			//pingMyPong();
+			return (pingMyPong(cfd, arg));
 		case 8:
 			//imSoDONE();
 		default :

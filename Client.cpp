@@ -10,7 +10,7 @@ Client::~Client(){
     // anytging to delete?
 }
 
-Client::Client(const Client& other) : _password(other.getPassword()), _nickname(other.getNick()), _username(other.getUser()), _ipA(other.getIPa()), _isRegistered(other.isRegistered()), _fd(other.getFd())
+Client::Client(const Client& other) : _password(other.getPassword()), _nickname(other.getNick()), _username(other.getUser()), _ipA(other.getIPa()), _isRegistered(other.isRegistered()), _fd(other.getFd()), _jointChannels(other._jointChannels), _opChannels(other._opChannels)
 {}
 
 Client& Client::operator=(const Client& other){
@@ -21,6 +21,8 @@ Client& Client::operator=(const Client& other){
 		_ipA = other.getIPa();
 		_isRegistered = other.isRegistered();
 		_fd = other.getFd();
+		_jointChannels.assign(other._jointChannels.begin(), other._jointChannels.end());
+		_opChannels.assign(other._opChannels.begin(), other._opChannels.end());
     }
     return (*this);
 }
