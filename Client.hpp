@@ -3,6 +3,8 @@
 #include <vector>
 #include "Channel.hpp"
 
+class Channel;
+
 class Client {
     private:
         std::string             _password;
