@@ -23,7 +23,7 @@ void	Server::checkKey(int cfd, Channel &channel, std::vector<std::string> &keys,
 		*canJoin = channel.getKey() == keys.at(index);
 		if (!canJoin)
 		{
-			std::string msg = ":ft_irc 475 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+k)\r\n"; //find out if IRC stops processing the whole command if error is found...
+			std::string msg = ":ircserv 475 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+k)\r\n"; //find out if IRC stops processing the whole command if error is found...
 			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		}
 	}
@@ -38,7 +38,7 @@ void	Server::checkInvite(int cfd, Channel &channel, bool *canJoin)
 		*canJoin = isInvited(cfd, channel.getInvitedClients());
 		if (!canJoin)
 		{
-			std::string msg = ":ft_irc 473 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+i)\r\n"; //find out if IRC stops processing the whole command if error is found...
+			std::string msg = ":ircserv 473 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+i)\r\n"; //find out if IRC stops processing the whole command if error is found...
 			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		}
 	}
@@ -53,7 +53,7 @@ void	Server::checkLimit(int cfd, Channel &channel, bool *canJoin)
 		*canJoin = static_cast<std::size_t>(channel.getClientLimit()) < channel.getJointClients().size();
 		if (!canJoin)
 		{
-			std::string msg = ":ft_irc 471 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+l)\r\n"; //find out if IRC stops processing the whole command if error is found...
+			std::string msg = ":ircserv 471 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+l)\r\n"; //find out if IRC stops processing the whole command if error is found...
 			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		}
 	}
@@ -120,7 +120,7 @@ void	Server::verifyChannels(int cfd, std::vector<std::string> &channels, std::ve
 		{
 			if (!keys.empty())
 				keys.erase(keys.begin() + index);
-			std::string msg = ":ft_irc 476 " + *begin + " :Bad Channel Mask\r\n"; //find out if IRC stops processing the whole command if error is found...
+			std::string msg = ":ircserv 476 " + *begin + " :Bad Channel Mask\r\n"; //find out if IRC stops processing the whole command if error is found...
 			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 			channels.erase(channels.begin() + index);
 		}
@@ -167,7 +167,7 @@ void	Server::join(int cfd, std::string arg)
 	}
 	if (channelNames.empty())
 	{
-		std::string msg = ":ft_irc 461 JOIN :Not enough parameters\r\n";
+		std::string msg = ":ircserv 461 JOIN :Not enough parameters\r\n";
 		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		return ;
 	}

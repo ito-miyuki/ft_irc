@@ -83,7 +83,7 @@ void	Server::authenticate(Client &client, std::string arg)
 		registerUser(client, arg);
 	if (!client.getPassword().empty() && !client.getNick().empty() && !client.getUser().empty())
 	{
-		std::string msg = ":ft_irc 001 " + client.getUser() + " :Welcome to the IRC Network, " + client.getNick() + "!\r\n"; // double checking needed
+		std::string msg = ":ircserv 001 " + client.getUser() + " :Welcome to the IRC Network, " + client.getNick() + "!\r\n"; // double checking needed
 		send(client.getFd(), msg.c_str(), msg.length(), 0);
 		client.setAsRegistered();
 	}
