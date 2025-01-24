@@ -83,7 +83,11 @@ void	Server::authenticate(Client &client, std::string arg)
 		registerUser(client, arg);
 	if (!client.getPassword().empty() && !client.getNick().empty() && !client.getUser().empty())
 	{
-		std::string msg = ":ircserv 001 " + client.getUser() + " :Welcome to the IRC Network, " + client.getNick() + "!\r\n"; // double checking needed
+		std::string msg = ":ircserv 001 " + client.getNick() + " :Welcome to the IRC Network, " + client.getNick() + "!\r\n"; // double checking needed
+		send(client.getFd(), msg.c_str(), msg.length(), 0);
+		msg = ":ircserv 002 " + client.getNick() + " :Your host is ircserv, running version 42\r\n";
+		send(client.getFd(), msg.c_str(), msg.length(), 0);
+		msg = ":ircserv 005 " + client.getNick() + " INVITE/MODE/JOIN/KICK/PING/TOPIC/PRIVMSG/NICK/QUIT :are supported by this server\r\n";
 		send(client.getFd(), msg.c_str(), msg.length(), 0);
 		client.setAsRegistered();
 	}
