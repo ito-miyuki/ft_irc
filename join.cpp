@@ -16,11 +16,11 @@ bool	Server::alreadyJoint(int cfd, std::vector<int> &jointClients)
 	return (false);
 }
 
-void	Server::checkKey(int cfd, Channel &channel, std::vector<std::string> &keys, bool *canJoin, int index)
+void	Server::checkKey(int cfd, Channel &channel, std::string key, bool *canJoin)
 {
-	if (channel.hasKey() && !keys.empty())
+	if (channel.hasKey() && !key.empty())
 	{
-		*canJoin = channel.getKey() == keys.at(index);
+		*canJoin = channel.getKey() == key;
 		if (!canJoin)
 		{
 			std::string msg = ":ircserv 475 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+k)\r\n"; //find out if IRC stops processing the whole command if error is found...
@@ -61,56 +61,63 @@ void	Server::checkLimit(int cfd, Channel &channel, bool *canJoin)
 		*canJoin = true;
 }
 
-void	Server::welcomeClient(int cfd, Channel &channel, int channelAmount)
+void	Server::welcomeClient(int cfd, Channel &channel)
 {
 	channel.getJointClients().push_back(cfd);
 	getClient(cfd).getJointChannels().push_back(&channel);
-	if (channelAmount == 1)
-	{
-		// print appropriate messages
-	}
+	std::string msg = ":" + getClient(cfd).getNick() + "!" + getClient(cfd).getUser() + "@" + getClient(cfd).getIPa() + " JOIN #" + channel.getChannelName() + "\r\n";
+	send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+	// print joined clients
+	// prints channel stats
 }
 
-void	Server::joinChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
+void	Server::addNewChannel(int cfd, std::string channelName, std::string channelKey)
 {
-	int		index = 0;
+	std::string	key = "";
+
+	if (!channelKey.empty())
+		key = channelKey;
+	Channel newChannel(channelName, getClient(cfd), key);
+	addChannel(newChannel);
+	getClient(cfd).addChannel(&newChannel);
+	getClient(cfd).addOpChannel(&newChannel);
+	welcomeClient(cfd, newChannel);
+}
+
+void	Server::joinChannel(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
+{
 	bool	canJoin = false;
+	Channel	&channel = getChannel(channels.at(0));
 
-	for (std::vector<std::string>::iterator begin = channels.begin(); begin != channels.end(); std::advance(begin, 1))
+	if (!channel.getChannelName().empty())
 	{
-		Channel	&channel = getChannel(*begin);
-
-		if (!channel.getChannelName().empty())
+		if (!alreadyJoint(cfd, channel.getJointClients()))
 		{
-			if (!alreadyJoint(cfd, channel.getJointClients()))
+			checkKey(cfd, channel, keys.at(0), &canJoin);
+			checkInvite(cfd, channel, &canJoin);
+			checkLimit(cfd, channel, &canJoin);
+			if (canJoin)
 			{
-				checkKey(cfd, channel, keys, &canJoin, index);
-				checkInvite(cfd, channel, &canJoin);
-				checkLimit(cfd, channel, &canJoin);
-				if (canJoin)
-				{
-					welcomeClient(cfd, channel, channels.size());
-				}
+				welcomeClient(cfd, channel);
 			}
 		}
-		else
-		{
-			// create new channel and add moderator rights
-		}
-		index++;
+	}
+	else
+	{
+		addNewChannel(cfd, channels.at(0), keys.at(0));
 	}
 }
 
-bool	Server::isValidName(std::string channel) // this may be unnecessary operation
+/* bool	Server::isValidName(std::string channel) // this may be unnecessary operation
 {
 	std::regex	correct("^[&#][^\\s,^\x07]+$");
 
 	if (std::regex_match(channel, correct))
 		return (true);
 	return (false);
-}
+} */
 
-void	Server::verifyChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
+/* void	Server::verifyChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
 {
 	int	index = 0;
 
@@ -126,7 +133,7 @@ void	Server::verifyChannels(int cfd, std::vector<std::string> &channels, std::ve
 		}
 		index++;
 	}
-}
+} */
 
 void	Server::parseChannelInfo(int cfd, std::string channelNames, std::string keys)
 {
@@ -144,8 +151,8 @@ void	Server::parseChannelInfo(int cfd, std::string channelNames, std::string key
 		while (getline(ks, substr, del))
 			keyList.push_back(substr);
 	}
-	verifyChannels(cfd, names, keyList);
-	joinChannels(cfd, names, keyList);
+	//verifyChannels(cfd, names, keyList);
+	joinChannel(cfd, names, keyList);
 }
 
 void	Server::join(int cfd, std::string arg)
@@ -171,7 +178,7 @@ void	Server::join(int cfd, std::string arg)
 		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		return ;
 	}
-	else if (channelNames.compare("0"))
+	else if (channelNames.compare("0") && keys.empty())
 	{
 		//executeSpecialOperation
 	}
