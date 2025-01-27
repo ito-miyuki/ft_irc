@@ -37,7 +37,7 @@ void	Server::runCommand(int cfd, std::string arg)
 	switch (cmdID)
 	{
 		case 0:
-			//kickSomeone();
+			kickSomeone(cfd, arg);
 		case 1:
 			//inviteRandos();
 		case 2:

@@ -79,6 +79,8 @@ class Server {
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
 
+		void	kickSomeone(int cdf, std::string arg);
+
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
         ~Server();
