@@ -2,23 +2,39 @@
 #include "Server.hpp"
 #include <exception>
 
+bool isPortValid(const std::string& port) {
+
+    if (port.empty()) {
+        return false;
+    }
+
+    int portNum;
+    try {
+        portNum = std::stoi(port);
+    } catch (const std::exception& e) {
+		return false;
+    }
+    
+    if (portNum < 1024 || portNum > 49151){
+        return false;
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
     if (argc != 3) {
         std::cerr << "Wrong argument. Usage: " << argv[0] << " <port> <password>" << std::endl;
         return 1;
     }
 
-    int port;
-    try {
-        port = std::stoi(argv[1]); // add more specific error here
-    } catch (const std::exception& e) {
-        std::cerr << "Invalid port: " << e.what() << std::endl;
-		return 1;
+    if (!isPortValid(argv[1])) {
+        std::cerr << "Port " << argv[1] << " is invalid." << std::endl;
+        return 1;
     }
 
-    std::cout << "Port: " << port << std::endl; // for testing. delete it.
+    int port = port = std::stoi(argv[1]);
 
-    std::string password = argv[2]; // check if argv[2] password is in valid format
+    std::string password = argv[2];
     try {
         Server server(port, password);
         server.runServer();
