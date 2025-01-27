@@ -2,16 +2,6 @@
 #include "Server.hpp"
 #include <exception>
 
-/*
-    0 ～ 1023: is already reserved for standard services(e.g., SSH, HTTP, HTTPS)
-            it require administrative privileges to use.
-    
-    1024 - 49151: registered ports
-
-    49152 ～ 65535: dynamic/private ports.
-            Typically used by operating systems for short-lived client connections, leading to potential conflicts.
-*/
-
 bool isPortValid(const std::string& port) {
 
     if (port.empty()) {
