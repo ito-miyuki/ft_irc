@@ -12,7 +12,6 @@ class Channel {
 		std::vector<int>	_jointClients; // list of active users on the channel
 		std::vector<int>	_invitedClients; // pending invitations for users
 		bool				_inviteOnly; // for +i
-		bool				_hasKey; // for +k, this could be unnecessary
 		bool				_topicRestricted; // for +t
 		std::string			_key; // channel password
 
@@ -30,7 +29,6 @@ class Channel {
 		std::vector<int>	&getJointClients() {return _jointClients;}
 		std::vector<int>	&getInvitedClients() {return _invitedClients;}
 		bool				isInviteOnly() const {return _inviteOnly;}
-		bool				hasKey() const {return _hasKey;}
 		bool				isTopicRestricted() const {return _topicRestricted;}
 		std::string			getKey() const {return _key;}
 
@@ -38,8 +36,8 @@ class Channel {
 		void				setTopic(std::string topic) {_topic = topic;}
 		void				setOp(Client& op) {_op = &op;}
 		void				setInviteOnly(bool status) {_inviteOnly = status;}
-		void				setKeyStatus(bool status) {_hasKey = status;}
 		void				setTopicRestricted(bool status) {_topicRestricted = status;}
 		void				setKey(std::string key) {_key = key;}
+		void				setClientLimit(int limit) {_clientLimit = limit;}
 
 };

@@ -78,6 +78,14 @@ class Server {
 		void	welcomeClient(int cfd, Channel &channel);
 		void	leaveAllChannels(int cfd);
 
+		void	mode(int cfd, std::string arg);
+		void	setMode(int cfd, std::string channel, std::string mode, std::string param);
+		bool	verifyParams(int cfd, std::string channel, std::string mode);
+		void	setInviteStatus(int cfd, std::string channel, std::string mode);
+		void	setTopicRestriction(int cfd, std::string channel, std::string mode);
+		void	setKey(int cfd, std::string channel, std::string mode, std::string param);
+		void	setClientLimit(int cfd, std::string channel, std::string mode, std::string param);
+
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
 
