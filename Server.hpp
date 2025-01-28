@@ -76,6 +76,7 @@ class Server {
 		void	checkInvite(int cfd, Channel &channel, bool *canJoin);
 		void	checkLimit(int cfd, Channel &channel, bool *canJoin);
 		void	welcomeClient(int cfd, Channel &channel);
+		void	leaveAllChannels(int cfd);
 
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);

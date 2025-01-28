@@ -67,8 +67,24 @@ void	Server::welcomeClient(int cfd, Channel &channel)
 	getClient(cfd).getJointChannels().push_back(&channel);
 	std::string msg = ":" + getClient(cfd).getNick() + "!" + getClient(cfd).getUser() + "@" + getClient(cfd).getIPa() + " JOIN #" + channel.getChannelName() + "\r\n";
 	send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
-	// print joined clients
-	// prints channel stats
+	if (!channel.getTopic().empty())
+	{
+		msg = ":ircserv 332 " + getClient(cfd).getNick() + " #" + channel.getChannelName() + " :" + channel.getTopic() + " \r\n";
+		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+	}
+	msg = ":ircserv 353 " + getClient(cfd).getNick() + " = #" "@" + channel.getChannelName() + " :@" + channel.getOp()->getNick();
+	std::size_t	size = channel.getJointClients().size();
+	for (std::size_t i = 0; i < size; i++)
+	{
+		int	client = channel.getJointClients().at(i);
+		msg = msg + " " + getClient(client).getNick();
+		i++;
+	}
+	msg = msg + "\r\n";
+	send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+	msg = ":ircserv 366 " + getClient(cfd).getNick() + " = #" "@" + channel.getChannelName() + " :End of /NAMES list\r\n";
+	send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+	// prints channel stats?
 }
 
 void	Server::addNewChannel(int cfd, std::string channelName, std::string channelKey)
@@ -155,6 +171,27 @@ void	Server::parseChannelInfo(int cfd, std::string channelNames, std::string key
 	joinChannel(cfd, names, keyList);
 }
 
+void	Server::leaveAllChannels(int cfd)
+{
+	Client	client = getClient(cfd);
+	std::string msg = ":" + getClient(cfd).getNick() + "!" + getClient(cfd).getUser() + "@" + getClient(cfd).getIPa() + " PART ";
+
+	if (!client.getOpChannels().empty())
+	{
+		for (std::vector<Channel*>::iterator it = client.getOpChannels().begin(); it != client.getOpChannels().end(); std::advance(it, 1))
+		{
+			msg = msg + "#" + (*it)->getChannelName() + ",";
+		}
+	}
+	for (std::vector<Channel*>::iterator it = client.getJointChannels().begin(); it != client.getJointChannels().end(); std::advance(it, 1))
+	{
+		msg = msg + "#" + (*it)->getChannelName() + ",";
+	}
+	msg.pop_back();
+	msg = msg + "\r\n";
+	send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+}
+
 void	Server::join(int cfd, std::string arg)
 {
 	std::stringstream	ss(arg);
@@ -180,7 +217,7 @@ void	Server::join(int cfd, std::string arg)
 	}
 	else if (channelNames.compare("0") && keys.empty())
 	{
-		//executeSpecialOperation
+		leaveAllChannels(cfd);
 	}
 	else
 	{
