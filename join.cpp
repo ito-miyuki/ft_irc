@@ -18,7 +18,7 @@ bool	Server::alreadyJoint(int cfd, std::vector<int> &jointClients)
 
 void	Server::checkKey(int cfd, Channel &channel, std::string key, bool *canJoin)
 {
-	if (channel.hasKey() && !key.empty())
+	if (!key.empty())
 	{
 		*canJoin = channel.getKey() == key;
 		if (!canJoin)
@@ -53,7 +53,7 @@ void	Server::checkLimit(int cfd, Channel &channel, bool *canJoin)
 		*canJoin = static_cast<std::size_t>(channel.getClientLimit()) < channel.getJointClients().size();
 		if (!canJoin)
 		{
-			std::string msg = ":ircserv 471 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+l)\r\n"; //find out if IRC stops processing the whole command if error is found...
+			std::string msg = ":ircserv 471 " + getClient(cfd).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+l)\r\n";
 			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		}
 	}
@@ -78,7 +78,6 @@ void	Server::welcomeClient(int cfd, Channel &channel)
 	{
 		int	client = channel.getJointClients().at(i);
 		msg = msg + " " + getClient(client).getNick();
-		i++;
 	}
 	msg = msg + "\r\n";
 	send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
@@ -103,9 +102,12 @@ void	Server::addNewChannel(int cfd, std::string channelName, std::string channel
 void	Server::joinChannel(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
 {
 	bool	canJoin = false;
-	Channel	&channel = getChannel(channels.at(0));
+	Channel	channel;
+	bool	channelExists = getChannel(channels.at(0), &channel);
+	//Channel	&channel = getChannel(channels.at(0));
 
-	if (!channel.getChannelName().empty())
+	//if (!channel.getChannelName().empty()) DANGEROUS
+	if (channelExists)
 	{
 		if (!alreadyJoint(cfd, channel.getJointClients()))
 		{

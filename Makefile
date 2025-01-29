@@ -17,7 +17,8 @@ SOURCES := main.cpp\
 			runCommands.cpp\
 			nick.cpp\
 			join.cpp\
-			pong.cpp
+			pong.cpp\
+			mode.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

@@ -16,7 +16,7 @@ class Channel {
 		std::string			_key; // channel password
 
     public:
-        //Channel(); // this may be unnecessary
+        Channel(); // this may be unnecessary
 		Channel(std::string name, Client &op, std::string key);
         ~Channel();
         Channel(const Channel& other);

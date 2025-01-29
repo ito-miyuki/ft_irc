@@ -38,7 +38,7 @@ Client	&Server::getClient(int fd)
 	return (*end); // this can cause problems....
 }
 
-Channel	&Server::getChannel(std::string name)
+/* Channel	&Server::getChannel(std::string name)
 {
 	std::vector<Channel>::iterator end = _channels.end();
 	for (std::vector<Channel>::iterator it = _channels.begin(); it != end; std::advance(it, 1))
@@ -47,6 +47,20 @@ Channel	&Server::getChannel(std::string name)
 			return (*it);
 	}
 	return (*end); // this can cause problems....
+} */
+
+bool	Server::getChannel(std::string name, Channel *channel)
+{
+	std::vector<Channel>::iterator end = _channels.end();
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != end; std::advance(it, 1))
+	{
+		if (it->getChannelName() == name)
+		{
+			*channel = *it;
+			return (true);
+		}
+	}
+	return (false); // this can cause problems....
 }
 
 bool Server::_signal = false;

@@ -108,7 +108,8 @@ class Server {
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
 
-		Channel	&getChannel(std::string name);
+		//Channel	&getChannel(std::string name);
+		bool		getChannel(std::string name, Channel *channel);
 		Client	&getClient(int fd);
 
 
