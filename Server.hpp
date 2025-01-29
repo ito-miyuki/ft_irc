@@ -80,6 +80,10 @@ class Server {
 		Server::Command	identifyCommand(std::string command);
 
 		void	kickSomeone(int cdf, std::string arg);
+		bool	isChannelExist(const std::string& channelName); // should this be in Channel class?
+		bool	isUserExist(const std::string& target); // should this be in Client class?
+		bool	isUserInChannel(const std::string& target, const std::string& channelName); // should this be in other class?
+		int		getTargetFd(const std::string& target); // should this be in other class?
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password

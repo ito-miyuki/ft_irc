@@ -1,6 +1,60 @@
 #include "Server.hpp"
 #include <algorithm> // std::find_if are we allowed to use?
 
+bool Server::isChannelExist(const std::string& channelName) {
+    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
+        if (ite->getChannelName() == channelName) {
+            std::cout << "Channel name exist" << std::endl; // do something
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Server::isUserExist(const std::string& target) {
+    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
+        if (ite->getUser() == target) {
+            std::cout << "Username exist" << std::endl; // do something
+            return true;
+        }
+    }
+    return false;
+}
+
+int Server::getTargetFd(const std::string& target) {
+    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
+        if (ite->getUser() == target) {
+            return ite->getFd();
+        }
+    }
+    return -1;
+}
+
+bool Server::isUserInChannel(const std::string& target, const std::string& channelName) {
+
+    int targetFd = getTargetFd(target);
+    if (targetFd == -1) {
+        std::cout << "The user doesn't exist in the server" << std::endl; // change the message
+        return false;
+    }
+
+    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
+        if (ite->getChannelName() == channelName) {
+            std::vector<int> jointClients = ite->getJointClients();
+
+            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), targetFd);
+            if(found != jointClients.end()) {
+                std::cout << "Username exist!" << std::endl; // do something
+                return true;
+            }
+            std::cout << "The user '" << target << "' is not in the channel '" << channelName << "'." << std::endl;
+            return false;
+        }
+    }
+    std::cout << "The channel doesn't exist" << std::endl; // change the message
+    return false;
+}
+
 void Server::kickSomeone(int cdf, std::string arg) {
     std::istringstream iss(arg); // converts this string to stream
     std::vector<std::string> tokens;
@@ -33,16 +87,20 @@ void Server::kickSomeone(int cdf, std::string arg) {
 
     // assuming the correct value comes for now but add something 
 
-    // add something to check if the channel exist
+    if (!isChannelExist(channelName)) {
+        std::cout << "There is no such channel" << std::endl; // change the error message
+        return ; // should I do something before return?
+    }
 
-    // std::vector<std::string>::iterator ite = std::find(_channels.begin(), _channels.end(), channelName);
-    // auto ite = std::find(_channels.begin(), _channels.end(), channelName);
-    // if (ite != _channels.end()) {
-    //     std::cout << "Channel name exist" << std::endl;
-    // } else {
-    //     std::cout << "There is no such channel" << std::endl;
-    //     return ;
-    // }
+    if (!isUserExist(target)) {
+        std::cout << "There is no such username" << std::endl; // change the error message
+        return ; // should I do something before return?
+    }
+
+    if (!isUserInChannel(target, channelName)) {
+        std::cout << "User is not in the channel" << std::endl; // change the error message
+        return ; // should I do something before return?
+    }
 
 }
     
