@@ -47,6 +47,8 @@ class Server {
 				FAIL
 		};
 
+		void	parser(std::string arg, std::vector<std::string> &params);
+
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
 		bool	isRegistered(int cfd);
