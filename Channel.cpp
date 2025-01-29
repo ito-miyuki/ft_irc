@@ -1,12 +1,14 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _name(""), _topic(""), _op(nullptr), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key("")
+Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key("")
 {}
 
-Channel::Channel(std::string name, Client &op, std::string key) : _name(name), _topic(""), _op(&op), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key(key)
-{}
+Channel::Channel(std::string name, int op, std::string key) : _name(name), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key(key)
+{
+	_ops.push_back(op);
+}
 
-Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _op(other.getOp()), _clientLimit(other.getClientLimit()), _jointClients(other._jointClients), _invitedClients(other._invitedClients), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
+Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _ops(other._ops), _clientLimit(other.getClientLimit()), _jointClients(other._jointClients), _invitedClients(other._invitedClients), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
 {}
 
 Channel	&Channel::operator=(const Channel &other)
@@ -15,7 +17,7 @@ Channel	&Channel::operator=(const Channel &other)
 	{
 		_name = other.getChannelName();
 		_topic = other.getTopic();
-		_op = other.getOp();
+		_ops = other._ops;
 		_clientLimit = other.getClientLimit();
 		_jointClients = other._jointClients;
 		_invitedClients = other._invitedClients;

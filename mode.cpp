@@ -1,19 +1,26 @@
-#include "Server.hpp"
+# include "Server.hpp"
 
-bool	Server::verifyParams(int cfd, std::string channel, std::string mode)
+bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 {
 	Channel	chnl;
-	bool	channelExists = getChannel(channel, &chnl);
+	bool	channelExists = getChannel(params.at(0), &chnl);
 
 	if (!channelExists)
 	{
-		std::string msg = ":ircserv 403 " + getClient(cfd).getUser() + " " + channel + " :No such channel\r\n";
-		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
-		return (false);
+		Client	client;
+		bool	clientExists = getClient(cfd, &client);
+
+		if (!clientExists)
+		{
+			std::string msg = ":ircserv 403 " + getClient(cfd).getUser() + " " + params.at(0) + " :No such channel\r\n";
+			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+			return (false);
+		}
+		return (true);
 	}
-	if (mode != "+i" && mode != "-i" && mode != "+t" && mode != "-t"
-		&& mode != "+k" && mode != "-k" && mode != "+o" && mode != "-o"
-		&& mode != "+l" && mode != "-l")
+	if (params.size() > 1 && params.at(1) != "+i" && params.at(1) != "-i" && params.at(1) != "+t" && params.at(1) != "-t"
+		&& params.at(1) != "+k" && params.at(1) != "-k" && params.at(1) != "+o" && params.at(1) != "-o"
+		&& params.at(1) != "+l" && params.at(1) != "-l")
 		// do we need to inform the client about the channel modes...?
 		return (false);
 	return (true);
@@ -105,10 +112,26 @@ void	Server::setClientLimit(int cfd, std::string channel, std::string mode, std:
 	}
 }
 
-void	Server::setMode(int cfd, std::string channel, std::string mode, std::string param)
+bool	Server::hasOpRights(int cfd, std::string channelName){
+
+	Channel	channel;
+	bool	channelExists = getChannel(channelName, &channel);
+
+	if (channelExists){
+
+		std::vector<int>	ops = channel.getOps();
+		std::vector<int>::iterator result = std::find(ops.begin(), ops.end(), cfd);
+		if (result != ops.end())
+			return (true);
+	}
+	return (false);
+}
+
+void	Server::setMode(int cfd, std::vector<std::string> &params)
 {
-	if (verifyParams(cfd, channel, mode))
+	if (verifyParams(cfd, params))
 	{
+		if (hasOpRights(cfd, params.at(0)))
 		//check operator priviledges and print appropriate error
 		if (!mode.empty())
 		{
@@ -130,29 +153,14 @@ void	Server::setMode(int cfd, std::string channel, std::string mode, std::string
 
 void	Server::mode(int cfd, std::string arg)
 {
-	std::stringstream	ss(arg);
-	std::string			substr;
-	char				del = ' ';
-	int					argCount = 0;
-	std::string			channel = "";
-	std::string			mode = "";
-	std::string			param = "";
+	std::vector<std::string>	params;
 
-	while (getline(ss, substr, del))
-	{
-		if (argCount == 1)
-			channel = substr;
-		if (argCount == 2)
-			mode = substr;
-		if (argCount == 3)
-			param = substr;
-		argCount++;
-	}
-	if (channel.empty())
+	parser(arg, params);
+	if (params.empty())
 	{
 		std::string msg = ":ircserv 461 " + getClient(cfd).getUser() + " MODE :Not enough parameters\r\n";
 		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		return ;
 	}
-	setMode(cfd, channel, mode, param);
+	setMode(cfd, params);
 }

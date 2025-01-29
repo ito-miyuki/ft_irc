@@ -104,9 +104,7 @@ void	Server::joinChannel(int cfd, std::vector<std::string> &channels, std::vecto
 	bool	canJoin = false;
 	Channel	channel;
 	bool	channelExists = getChannel(channels.at(0), &channel);
-	//Channel	&channel = getChannel(channels.at(0));
 
-	//if (!channel.getChannelName().empty()) DANGEROUS
 	if (channelExists)
 	{
 		if (!alreadyJoint(cfd, channel.getJointClients()))
@@ -125,33 +123,6 @@ void	Server::joinChannel(int cfd, std::vector<std::string> &channels, std::vecto
 		addNewChannel(cfd, channels.at(0), keys.at(0));
 	}
 }
-
-/* bool	Server::isValidName(std::string channel) // this may be unnecessary operation
-{
-	std::regex	correct("^[&#][^\\s,^\x07]+$");
-
-	if (std::regex_match(channel, correct))
-		return (true);
-	return (false);
-} */
-
-/* void	Server::verifyChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
-{
-	int	index = 0;
-
-	for (std::vector<std::string>::iterator begin = channels.begin(); begin != channels.end(); std::advance(begin, 1))
-	{
-		if (!isValidName(*begin))
-		{
-			if (!keys.empty())
-				keys.erase(keys.begin() + index);
-			std::string msg = ":ircserv 476 " + *begin + " :Bad Channel Mask\r\n"; //find out if IRC stops processing the whole command if error is found...
-			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
-			channels.erase(channels.begin() + index);
-		}
-		index++;
-	}
-} */
 
 void	Server::parseChannelInfo(int cfd, std::string channelNames, std::string keys)
 {
@@ -196,33 +167,48 @@ void	Server::leaveAllChannels(int cfd)
 
 void	Server::join(int cfd, std::string arg)
 {
-	std::stringstream	ss(arg);
-	std::string			substr;
-	char				del = ' ';
-	int					argCount = 0;
-	std::string			channelNames = "";
-	std::string			keys = "";
+	std::vector<std::string>	params;
 
-	while (getline(ss, substr, del))
-	{
-		if (argCount == 1)
-			channelNames = substr;
-		if (argCount == 2)
-			keys = substr;
-		argCount++;
-	}
-	if (channelNames.empty())
+	parser(arg, params);
+	if (params.empty() || params.at(0).empty())
 	{
 		std::string msg = ":ircserv 461 JOIN :Not enough parameters\r\n";
 		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
 		return ;
 	}
-	else if (channelNames.compare("0") && keys.empty())
+	else if (params.at(0).compare("0") == 0 && params.size() == 1)
 	{
 		leaveAllChannels(cfd);
 	}
 	else
 	{
-		parseChannelInfo(cfd, channelNames, keys);
+		parseChannelInfo(cfd, params.at(0), params.at(1));
 	}
 }
+
+/* bool	Server::isValidName(std::string channel) // this may be unnecessary operation
+{
+	std::regex	correct("^[&#][^\\s,^\x07]+$");
+
+	if (std::regex_match(channel, correct))
+		return (true);
+	return (false);
+} */
+
+/* void	Server::verifyChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys)
+{
+	int	index = 0;
+
+	for (std::vector<std::string>::iterator begin = channels.begin(); begin != channels.end(); std::advance(begin, 1))
+	{
+		if (!isValidName(*begin))
+		{
+			if (!keys.empty())
+				keys.erase(keys.begin() + index);
+			std::string msg = ":ircserv 476 " + *begin + " :Bad Channel Mask\r\n"; //find out if IRC stops processing the whole command if error is found...
+			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+			channels.erase(channels.begin() + index);
+		}
+		index++;
+	}
+} */

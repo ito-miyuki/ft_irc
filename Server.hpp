@@ -48,6 +48,7 @@ class Server {
 		};
 
 		void	parser(std::string arg, std::vector<std::string> &params);
+		bool	hasOpRights(int cfd, std::string channelName);
 
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
@@ -82,7 +83,7 @@ class Server {
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::string channel, std::string mode, std::string param);
-		bool	verifyParams(int cfd, std::string channel, std::string mode);
+		bool	verifyParams(int cfd, std::vector<std::string> &params);
 		void	setInviteStatus(int cfd, std::string channel, std::string mode);
 		void	setTopicRestriction(int cfd, std::string channel, std::string mode);
 		void	setKey(int cfd, std::string channel, std::string mode, std::string param);
@@ -112,7 +113,8 @@ class Server {
 
 		//Channel	&getChannel(std::string name);
 		bool		getChannel(std::string name, Channel *channel);
-		Client	&getClient(int fd);
+		bool		getClient(int fd, Client *client);
+		//Client	&getClient(int fd);
 
 
 		static void setSignal(bool value); // is this a correct place to put?

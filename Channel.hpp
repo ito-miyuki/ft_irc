@@ -7,7 +7,7 @@ class Channel {
     private:
         std::string			_name; // channel name
 		std::string			_topic; // channel topic
-		Client				*_op; // moderator client
+		std::vector<int>	_ops; // moderator clients
 		int					_clientLimit; // -1 for unlimited, positive int for limits
 		std::vector<int>	_jointClients; // list of active users on the channel
 		std::vector<int>	_invitedClients; // pending invitations for users
@@ -17,14 +17,14 @@ class Channel {
 
     public:
         Channel(); // this may be unnecessary
-		Channel(std::string name, Client &op, std::string key);
+		Channel(std::string name, int op, std::string key);
         ~Channel();
         Channel(const Channel& other);
         Channel& operator=(const Channel& other);
 
 		std::string			getChannelName() const {return _name;}
 		std::string			getTopic() const {return _topic;}
-		Client				*getOp() const {return _op;}
+		std::vector<int>	&getOps() {return _ops;}
 		int					getClientLimit() const {return _clientLimit;}
 		std::vector<int>	&getJointClients() {return _jointClients;}
 		std::vector<int>	&getInvitedClients() {return _invitedClients;}
@@ -34,7 +34,7 @@ class Channel {
 
 		void				setChannelName(std::string name) {_name = name;}
 		void				setTopic(std::string topic) {_topic = topic;}
-		void				setOp(Client& op) {_op = &op;}
+		void				addOp(int op) {_ops.push_back(op);}
 		void				setInviteOnly(bool status) {_inviteOnly = status;}
 		void				setTopicRestricted(bool status) {_topicRestricted = status;}
 		void				setKey(std::string key) {_key = key;}
