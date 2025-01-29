@@ -15,6 +15,7 @@ SOURCES := main.cpp\
 			processClientInput.cpp\
 			registerClient.cpp\
 			runCommands.cpp\
+			parser.cpp\
 			nick.cpp\
 			join.cpp\
 			pong.cpp
