@@ -18,7 +18,8 @@ SOURCES := main.cpp\
 			nick.cpp\
 			join.cpp\
 			pong.cpp\
-			kickSomeone.cpp
+			kickSomeone.cpp\
+			inviteRandos.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

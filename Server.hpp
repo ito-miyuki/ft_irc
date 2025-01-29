@@ -85,6 +85,8 @@ class Server {
 		bool	isUserInChannel(const std::string& target, const std::string& channelName); // should this be in other class?
 		int		getTargetFd(const std::string& target); // should this be in other class?
 
+		void	inviteRandos(int cfd, std::string arg);
+
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
         ~Server();

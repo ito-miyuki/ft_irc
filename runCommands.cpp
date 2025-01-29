@@ -39,7 +39,7 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 0:
 			kickSomeone(cfd, arg);
 		case 1:
-			//inviteRandos();
+			inviteRandos(cfd, arg);
 		case 2:
 			//setTopic();
 		case 3:

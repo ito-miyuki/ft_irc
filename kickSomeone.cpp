@@ -100,6 +100,7 @@ void Server::kickSomeone(int cdf, std::string arg) {
         std::cout << "Token: " << token << std::endl;
     }
 
+    // doesChannelExit or channelExist ???
     if (!isChannelExist(channelName)) {
         std::cout << "There is no such channel" << std::endl; // change the error message
         return ; // should I do something before return?
