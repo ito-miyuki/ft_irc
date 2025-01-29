@@ -2,7 +2,11 @@
 #include <algorithm> // std::find_if are we allowed to use?
 
 bool Server::isChannelExist(const std::string& channelName) {
+    std::cout << "You are in isChannelExist()" << std::endl;
+    std::cout << "Total channels in _channels: " << _channels.size() << std::endl;
+
     for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
+        std::cout << "channel name that I am looking at is: " << ite->getChannelName() << std::endl;
         if (ite->getChannelName() == channelName) {
             std::cout << "Channel name exist" << std::endl; // do something
             return true;
@@ -80,12 +84,21 @@ void Server::kickSomeone(int cdf, std::string arg) {
         return ;
     }
 
+    // assuming that parameter are in correct format /KICK #channel user name
     std::string command = tokens[0];
-    std::string channelName = tokens[1];
+    std::string channelName;
+    if (!tokens[1].empty() && tokens[1].at(0) == '#') {
+        channelName = tokens[1].erase(0, 1);
+    } else {
+        channelName = tokens[1];
+    }
     std::string target = tokens[2];
     std::string reason = tokens[3]; // reason could be 3 + rest of tokens.
 
-    // assuming the correct value comes for now but add something 
+    // prints out for testing, delete them
+    for (const std::string& token : tokens) {
+        std::cout << "Token: " << token << std::endl;
+    }
 
     if (!isChannelExist(channelName)) {
         std::cout << "There is no such channel" << std::endl; // change the error message
