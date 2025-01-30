@@ -64,9 +64,8 @@ void Server::kickSomeone(int cdf, std::string arg) {
     std::vector<std::string> tokens;
     std::string token;
 
-    // prints out for testing, delete them 
-    std::cout << "Hello from kickSomeone function." << std::endl;
-    std::cout << "cdf is '" << cdf << "' and arg is '" << arg << "'." << std::endl;
+    // prints out for testing, delete it
+    std::cout << "kickSomeone(): cdf is '" << cdf << "' and arg is '" << arg << "'." << std::endl;
 
     // splits the stream by delimiter. default delimiter is space
     while (iss >> token) {
@@ -88,17 +87,37 @@ void Server::kickSomeone(int cdf, std::string arg) {
     std::string command = tokens[0];
     std::string channelName;
     if (!tokens[1].empty() && tokens[1].at(0) == '#') {
-        channelName = tokens[1].erase(0, 1);
+        channelName = tokens[1].erase(0, 1); // do we need it?
     } else {
         channelName = tokens[1];
     }
+
     std::string target = tokens[2];
-    std::string reason = tokens[3]; // reason could be 3 + rest of tokens.
+
+    std::string reason; // reason could be at index 3 or 3 + rest of tokens.
+    bool foundColon = false;
+
+    for (size_t i = 3; i < tokens.size(); i++) {
+        if (!foundColon) {
+            if (tokens[i][0] == ':') {
+                foundColon = true;
+                reason = tokens[i].substr(1);
+            }
+        } 
+        else {
+            reason += " " + tokens[i];
+        }
+    }
+
+    if (!foundColon && tokens.size() > 3) {
+        reason = tokens[3];
+    }
 
     // prints out for testing, delete them
-    for (const std::string& token : tokens) {
-        std::cout << "Token: " << token << std::endl;
-    }
+    std::cout << "Command is: " << command << std::endl;
+    std::cout << "Channel name is: " << channelName << std::endl;
+    std::cout << "Target is: " << target << std::endl;
+    std::cout << "Reason is: " << reason << std::endl;
 
     // doesChannelExit or channelExist ???
     if (!isChannelExist(channelName)) {
