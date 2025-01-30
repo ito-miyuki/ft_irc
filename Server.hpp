@@ -84,11 +84,13 @@ class Server {
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);
 		bool	verifyParams(int cfd, std::vector<std::string> &params);
-		void	setInviteStatus(int cfd, std::string channel, std::string mode);
-		void	setTopicRestriction(int cfd, std::string channel, std::string mode);
-		void	setKey(int cfd, std::string channel, std::string mode, std::string param);
-		void	setClientLimit(int cfd, std::string channel, std::string mode, std::string param);
+		void	setInviteStatus(int cfd, Channel &channel, std::string mode);
+		void	setTopicRestriction(int cfd, Channel &channel, std::string mode);
+		void	setKey(int cfd, Channel &channel, std::vector<std::string> &params);
+		void	setClientLimit(int cfd, Channel &channel, std::vector<std::string> &params);
+		void	setOpRights(int cfd, std::vector<std::string> &params);
 		bool	isClient(std::string nick);
+		bool	getClient(std::string name, Client *client);
 
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
