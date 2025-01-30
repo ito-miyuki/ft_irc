@@ -26,55 +26,34 @@ void    Server::decrementClientAmount() {
     _clientAmount--;
 }
 
-/* Client	&Server::getClient(int fd)
+int	Server::getClientIndex(int fd)
 {
-	std::vector<Client>::iterator end = _clients.end();
-	for (std::vector<Client>::iterator it = _clients.begin(); it != end; std::advance(it, 1))
-	{
-		if (it->getFd() == fd)
-			return (*it);
-	}
-	std::cout << "Couldn't find client" << std::endl;
-	return (*end); // this can cause problems....
-} */
-
-/* Channel	&Server::getChannel(std::string name)
-{
-	std::vector<Channel>::iterator end = _channels.end();
-	for (std::vector<Channel>::iterator it = _channels.begin(); it != end; std::advance(it, 1))
-	{
-		if (it->getChannelName() == name)
-			return (*it);
-	}
-	return (*end); // this can cause problems....
-} */
-
-bool	Server::getClient(int fd, Client *client)
-{
+	int	index = 0;
 	std::vector<Client>::iterator end = _clients.end();
 	for (std::vector<Client>::iterator it = _clients.begin(); it != end; std::advance(it, 1))
 	{
 		if (it->getFd() == fd)
 		{
-			*client = *it;
-			return (true);
+			return (index);
 		}
+		index++;
 	}
-	return (false);
+	return (-1);
 }
 
-bool	Server::getChannel(std::string name, Channel *channel)
+int	Server::getChannelIndex(std::string name)
 {
+	int	index = 0;
 	std::vector<Channel>::iterator end = _channels.end();
 	for (std::vector<Channel>::iterator it = _channels.begin(); it != end; std::advance(it, 1))
 	{
 		if (it->getChannelName() == name)
 		{
-			*channel = *it;
-			return (true);
+			return (index);
 		}
+		index++;
 	}
-	return (false);
+	return (-1);
 }
 
 bool Server::_signal = false;

@@ -1,19 +1,25 @@
 # include "Server.hpp"
 
+bool	Server::isClient(std::string nick)
+{
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
+	{
+		if ((*it).getNick() == nick || (*it).getUser() == nick) // one of these might be unnecessary
+			return (true);
+	}
+	return (false);
+}
+
 bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 {
-	Channel	chnl;
-	bool	channelExists = getChannel(params.at(0), &chnl);
+	int	chIndex = getChannelIndex(params.at(0));
 
-	if (!channelExists)
+	if (chIndex < 0)
 	{
-		Client	client;
-		bool	clientExists = getClient(cfd, &client);
-
-		if (!clientExists)
+		if (!isClient(params.at(0)))
 		{
-			std::string msg = ":ircserv 403 " + getClient(cfd).getUser() + " " + params.at(0) + " :No such channel\r\n";
-			send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+			std::string msg = ":ircserv 403 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :No such channel\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
 			return (false);
 		}
 		return (true);
@@ -114,12 +120,11 @@ void	Server::setClientLimit(int cfd, std::string channel, std::string mode, std:
 
 bool	Server::hasOpRights(int cfd, std::string channelName){
 
-	Channel	channel;
-	bool	channelExists = getChannel(channelName, &channel);
+	int	chIndex = getChannelIndex(channelName);
 
-	if (channelExists){
+	if (chIndex > -1){
 
-		std::vector<int>	ops = channel.getOps();
+		std::vector<int>	ops = _channels.at(chIndex).getOps();
 		std::vector<int>::iterator result = std::find(ops.begin(), ops.end(), cfd);
 		if (result != ops.end())
 			return (true);
@@ -132,21 +137,24 @@ void	Server::setMode(int cfd, std::vector<std::string> &params)
 	if (verifyParams(cfd, params))
 	{
 		if (hasOpRights(cfd, params.at(0)))
-		//check operator priviledges and print appropriate error
-		if (!mode.empty())
 		{
-			if (mode.back() == 'o')
+			//check operator priviledges and print appropriate error
+		}
+		if (!params.at(1).empty())
+		{
+			Channel	channel = _channels.at(getChannelIndex(params.at(0)));
+			if (params.at(1).back() == 'o')
 			{
 				// add moderator priviledges
 			}
-			else if (mode.back() == 'i' && param.empty())
+			else if (params.at(1).back() == 'i' && params.empty())
 				setInviteStatus(cfd, channel, mode);
-			else if (mode.back() == 't' && param.empty())
+			else if (params.at(1).back() == 't' && params.empty())
 				setTopicRestriction(cfd, channel, mode);
-			else if (mode.back() == 'k')
-				setKey(cfd, channel, mode, param);
-			else if (mode.back() == 'l')
-				setClientLimit(cfd, channel, mode, param);
+			else if (params.at(1).back() == 'k')
+				setKey(cfd, channel, params.at(1), param);
+			else if (params.at(1).back() == 'l')
+				setClientLimit(cfd, channel, params.at(1), param);
 		}
 	}
 }
@@ -158,8 +166,8 @@ void	Server::mode(int cfd, std::string arg)
 	parser(arg, params);
 	if (params.empty())
 	{
-		std::string msg = ":ircserv 461 " + getClient(cfd).getUser() + " MODE :Not enough parameters\r\n";
-		send(getClient(cfd).getFd(), msg.c_str(), msg.length(), 0);
+		std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+		send(cfd, msg.c_str(), msg.length(), 0);
 		return ;
 	}
 	setMode(cfd, params);

@@ -82,15 +82,19 @@ class Server {
 		void	leaveAllChannels(int cfd);
 
 		void	mode(int cfd, std::string arg);
-		void	setMode(int cfd, std::string channel, std::string mode, std::string param);
+		void	setMode(int cfd, std::vector<std::string> &params);
 		bool	verifyParams(int cfd, std::vector<std::string> &params);
 		void	setInviteStatus(int cfd, std::string channel, std::string mode);
 		void	setTopicRestriction(int cfd, std::string channel, std::string mode);
 		void	setKey(int cfd, std::string channel, std::string mode, std::string param);
 		void	setClientLimit(int cfd, std::string channel, std::string mode, std::string param);
+		bool	isClient(std::string nick);
 
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
+
+		int		getClientIndex(int fd);
+		int		getChannelIndex(std::string name);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
@@ -110,12 +114,6 @@ class Server {
 
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
-
-		//Channel	&getChannel(std::string name);
-		bool		getChannel(std::string name, Channel *channel);
-		bool		getClient(int fd, Client *client);
-		//Client	&getClient(int fd);
-
 
 		static void setSignal(bool value); // is this a correct place to put?
 };
