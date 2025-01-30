@@ -1,5 +1,8 @@
 #include "Channel.hpp"
 
+Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key("")
+{}
+
 Channel::Channel(std::string name, Client &op, std::string key) : _name(name), _topic(""), _op(&op), _clientLimit(-1), _inviteOnly(false), _hasKey(false), _topicRestricted(false), _key(key)
 {}
 

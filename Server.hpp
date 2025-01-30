@@ -79,7 +79,14 @@ class Server {
 		void	welcomeClient(int cfd, Channel &channel, int channelAmount);
 
 		void	pingMyPong(int cfd, std::string arg);
+		void	messages(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
+		void    sendToClient(int cfd, std::string dm, std::string recipient);
+		void    sendToChannel(int cfd, std::string dm, std::string recipient);
+		bool    checkClient(std::string name, Client *client);
+		bool    checkChannel(std::string name, Channel *channel);
+		bool    checkSender(int cfd, Client *client);
+
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
@@ -103,6 +110,7 @@ class Server {
 		Channel	&getChannel(std::string name);
 		Client	&getClient(int fd);
 
-
 		static void setSignal(bool value); // is this a correct place to put?
+
+
 };

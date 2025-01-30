@@ -1,7 +1,7 @@
 #include "Client.hpp"
 
-/* Client::Client() : _password(""), _nickname(""), _username(""), _ipA(""), _isRegistered(false), _fd(-1)
-{} */
+Client::Client() : _password(""), _nickname(""), _username(""), _ipA(""), _isRegistered(false), _fd(-1)
+{}
 
 Client::Client(int fd, std::string ipAddress) : _password(""), _nickname(""), _username(""), _ipA(ipAddress), _isRegistered(false), _fd(fd)
 {}

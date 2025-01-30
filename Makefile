@@ -18,7 +18,9 @@ SOURCES := main.cpp\
 			parser.cpp\
 			nick.cpp\
 			join.cpp\
-			pong.cpp
+			pong.cpp\
+			messages.cpp\
+			channel_helpers.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
