@@ -15,7 +15,7 @@ void    Server::sendToClient(int cfd, std::string dm, std::string recipient)
         sendThis = ":" + sender.getNick() + " PRIVMSG " + reci.getNick() + " :" + dm + "\r\n"; 
         send(reci.getFd(), sendThis.c_str(), sendThis.length(), 0);
     } else {
-        sendThis = ":401 " + sender.getNick() + " " + recipient + " :No suck nick/channel\r\n";
+        sendThis = ":ft_irc 401 " + sender.getNick() + "!" + "~" + sender.getUser() + "@ft_irc" + " " + recipient + " :No such nick/channel\r\n";
         send(cfd, sendThis.c_str(), sendThis.length(), 0);
     }
 }
@@ -39,12 +39,12 @@ void    Server::sendToChannel(int cfd, std::string dm, std::string recipient)
                     }
                 }
             } else {
-                sendThis = ":404 " + sender.getNick() + " #" + channel.getChannelName() + " :Cannot send to channel\r\n";
+                sendThis = ":ft_irc 404 " + sender.getNick() + " #" + channel.getChannelName() + " :Cannot send to channel\r\n";
                 send(cfd, sendThis.c_str(), sendThis.length(), 0);
                 return ;
             }
         } else {
-            std::string sendThis = ":401 " + sender.getNick() + " " + recipient + " :No suck nick/channel\r\n";
+            std::string sendThis = ":ft_irc 401 " + sender.getNick() + " #" + recipient + " :No such nick/channel\r\n";
             send(cfd, sendThis.c_str(), sendThis.length(), 0);
             return ;
         }
@@ -52,16 +52,16 @@ void    Server::sendToChannel(int cfd, std::string dm, std::string recipient)
 }
 
 
-void    Server::messages(int cfd, std::string arg) {
-    std::cout << "This is what I got to function: " << arg << std::endl;
-    
+void    Server::messages(int cfd, std::string arg) {    
     std::string message;
     message = arg.substr(8, arg.size() - 8);
+    
     std::string recipient;
     size_t split = message.find(':');
     recipient = message.substr(0, split - 1);
     std::string dm;
     dm = message.substr(split + 1, message.size() - split);
+    
     if (recipient[0] != '#')
         sendToClient(cfd, dm, recipient);
     else
