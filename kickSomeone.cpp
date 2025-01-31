@@ -15,15 +15,15 @@ bool Server::channelExist(const std::string& channelName) {
     return false;
 }
 
-bool Server::userExist(const std::string& userName) {
-    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
-        if (ite->getUser() == userName) {
-            std::cout << "Username exist" << std::endl; // do something
-            return true;
-        }
-    }
-    return false;
-}
+// bool Server::userExist(const std::string& userName) {
+//     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
+//         if (ite->getUser() == userName) {
+//             std::cout << "Username exist" << std::endl; // do something
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 int Server::getUserFd(const std::string& userName) {
     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
@@ -34,19 +34,13 @@ int Server::getUserFd(const std::string& userName) {
     return -1;
 }
 
-bool Server::isUserInChannel(const std::string& userName, const std::string& channelName) {
-
-    int targetFd = getUserFd(userName);
-    if (targetFd == -1) {
-        std::cout << "The user doesn't exist in the server" << std::endl; // change the message
-        return false;
-    }
+bool Server::isUserInChannel(const std::string& userName, const std::string& channelName, int userFd) {
 
     for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
         if (ite->getChannelName() == channelName) {
             std::vector<int> jointClients = ite->getJointClients();
 
-            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), targetFd);
+            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
             if(found != jointClients.end()) {
                 std::cout << "Username exist!" << std::endl; // do something
                 return true;
@@ -59,13 +53,13 @@ bool Server::isUserInChannel(const std::string& userName, const std::string& cha
     return false;
 }
 
-void Server::kickSomeone(int cdf, std::string arg) {
+void Server::kickSomeone(int cfd, std::string arg) {
     std::istringstream iss(arg); // converts this string to stream
     std::vector<std::string> tokens;
     std::string token;
 
     // prints out for testing, delete it
-    std::cout << "kickSomeone(): cdf is '" << cdf << "' and arg is '" << arg << "'." << std::endl;
+    std::cout << "kickSomeone(): cfd is '" << cfd << "' and arg is '" << arg << "'." << std::endl;
 
     // splits the stream by delimiter. default delimiter is space
     while (iss >> token) {
@@ -84,7 +78,6 @@ void Server::kickSomeone(int cdf, std::string arg) {
     }
 
     // assuming that parameter are in correct format /KICK #channel user name
-    std::string command = tokens[0];
     std::string channelName;
     if (!tokens[1].empty() && tokens[1].at(0) == '#') {
         channelName = tokens[1].erase(0, 1); // do we need it?
@@ -92,7 +85,7 @@ void Server::kickSomeone(int cdf, std::string arg) {
         channelName = tokens[1];
     }
 
-    std::string target = tokens[2];
+    std::string userName = tokens[2];
 
     std::string reason; // reason could be at index 3 or 3 + rest of tokens.
     bool foundColon = false;
@@ -114,24 +107,42 @@ void Server::kickSomeone(int cdf, std::string arg) {
     }
 
     // prints out for testing, delete them
-    std::cout << "Command is: " << command << std::endl;
     std::cout << "Channel name is: " << channelName << std::endl;
-    std::cout << "Target is: " << target << std::endl;
+    std::cout << "userName is: " << userName << std::endl;
     std::cout << "Reason is: " << reason << std::endl;
 
     if (!channelExist(channelName)) {
-        std::cout << "There is no such channel" << std::endl; // change the error message
-        return ; // should I do something before return?
+        std::string errMsg = ":server 403 " + userName + " " + "#" + channelName + " :No such channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging
+        return ;
     }
 
-    if (!userExist(target)) {
-        std::cout << "There is no such username" << std::endl; // change the error message
-        return ; // should I do something before return?
+    int userFd = getUserFd(userName);
+    if (userFd == -1) {
+        std::cout << "There is no such username" << std::endl; // for debugging
+        return ;
     }
 
-    if (!isUserInChannel(target, channelName)) {
-        std::cout << "User is not in the channel" << std::endl; // change the error message
-        return ; // should I do something before return?
+    // if (!userExist(userName)) {
+    //     std::cout << "There is no such username" << std::endl; // for debugging
+    //     return ;
+    // }
+
+    if (!isUserInChannel(userName, channelName, userFd)) {
+        std::string errMsg = ":server 441 " + userName + " " + "#" + channelName + " :They aren't on that channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging
+        return ;
     }
+
+    Channel* channel = getChannelObj(channelName);
+    if (!channel) {
+        std::cerr << "Channel '" << channelName << "' does not exist!" << std::endl;
+        return;
+    } 
+
+    channel->removeClient(userFd);
+    channel->broadcast("message here", cfd, true);
 }
     

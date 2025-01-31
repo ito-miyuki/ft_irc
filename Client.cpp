@@ -26,4 +26,3 @@ Client& Client::operator=(const Client& other){
     }
     return (*this);
 }
-

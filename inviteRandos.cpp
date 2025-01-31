@@ -10,6 +10,15 @@ bool Server::nicknameExist(const std::string& nickname) {
     return false;
 }
 
+int Server::getUserFdbyNick(const std::string& nickName) {
+    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
+        if (ite->getUser() == nickName) {
+            return ite->getFd();
+        }
+    }
+    return -1;
+}
+
 void Server::inviteRandos(int cfd, std::string arg){
     // delete it
     std::cout << "inviteRandos(): cfd is " << cfd << " and arg is " << arg << std::endl;
@@ -29,7 +38,12 @@ void Server::inviteRandos(int cfd, std::string arg){
     }
 
     std::string nickName = tokens[1];
-    std::string channelName = tokens[2];
+    std::string channelName;
+    if (!tokens[2].empty() && tokens[2].at(0) == '#') {
+        channelName = tokens[2].erase(0, 1); // do we need it?
+    } else {
+        channelName = tokens[2];
+    }
 
     std::cout << "nickname is " << nickName << std::endl;
     std::cout << "channelName is " << channelName << std::endl;
@@ -44,21 +58,36 @@ void Server::inviteRandos(int cfd, std::string arg){
 
    // - does Channel exist?
     if (!channelExist(channelName)) {
-        std::cout << "There is no such channel" << std::endl; // change the error message
+        std::string errMsg = ":server 403 " + nickName + " " + "#" + channelName + " :No such channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging
         return ; // should I do something before return?
+    }
+
+    int userFd = getUserFd(nickName);
+    if (userFd == -1) {
+        std::cout << "There is no such username" << std::endl; // for debugging
+        return ;
     }
 
     // does the target user exist?
     if (!nicknameExist(nickName)) {
-        std::cout << "There is no such nickname" << std::endl; // change the error message
+        std::cout << "There is no such nickname" << std::endl; // for debugging
         return ; // should I do something before return?
     }
 
-    if (!isUserInChannel(nickName, channelName)) {
-        std::cout << "User is not in the channel" << std::endl; // change the error message
+    if (isUserInChannel(nickName, channelName, userFd)) {
+        std::cout << "User is already in the channel" << std::endl; // for debugging
         return ; // should I do something before return?
     }
 
+    Channel* channel = getChannelObj(channelName);
+    if (!channel) {
+        std::cerr << "Channel '" << channelName << "' does not exist!" << std::endl;
+        return;
+    } 
 
     // add the user to the invited list in channel class
+    channel->addToInvitedClients(userFd);
+
 }

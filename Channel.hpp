@@ -1,6 +1,10 @@
 #pragma once
 #include "Client.hpp"
 
+#include <algorithm>
+#include <iostream> // for std::cerr, if you are not usinig it, delete it
+#include <sys/socket.h> // for send
+
 class Client;
 
 class Channel {
@@ -42,4 +46,7 @@ class Channel {
 		void				setTopicRestricted(bool status) {_topicRestricted = status;}
 		void				setKey(std::string key) {_key = key;}
 
+		void				removeClient(int cfd);
+		void				broadcast(const std::string& msg, int senderFd, bool excludeSender);
+		void				addToInvitedClients(int cfd);
 };

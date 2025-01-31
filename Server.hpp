@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <poll.h> // for pol()
-#include <sys/socket.h> // for socket()
+#include <sys/socket.h> // for socket() and send
 #include <netinet/in.h> // for sockaddr_in
 #include <unistd.h> // for close()
 #include <cstring> // for memset
@@ -79,14 +79,16 @@ class Server {
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
 
-		void	kickSomeone(int cdf, std::string arg);
+		void	kickSomeone(int cfd, std::string arg);
 		bool	channelExist(const std::string& channelName); // should this be in Channel class?
-		bool	userExist(const std::string& userName); // should this be in Client class?
-		bool	isUserInChannel(const std::string& userName, const std::string& channelName); // should this be in other class?
+		// bool	userExist(const std::string& userName); // should this be in Client class?
+		bool	isUserInChannel(const std::string& userName, const std::string& channelName, int userFd); // should this be in other class?
 		int		getUserFd(const std::string& userName); // should this be in other class?
+		Channel* getChannelObj(const std::string& channelName); // temporary solution
 
 		void	inviteRandos(int cfd, std::string arg);
 		bool	nicknameExist(const std::string& nickname);
+		int		getUserFdbyNick(const std::string& nickName);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password

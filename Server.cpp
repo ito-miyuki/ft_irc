@@ -54,3 +54,14 @@ bool Server::_signal = false;
 void Server::setSignal(bool value) {
         _signal = value;
 }
+
+// this is a temporary solution
+Channel* Server::getChannelObj(const std::string& channelName) {
+    auto it = std::find_if(_channels.begin(), _channels.end(),
+        [&channelName](const Channel& ch) { return ch.getChannelName() == channelName; });
+
+    if (it != _channels.end()) {
+        return &(*it);
+    }
+    return nullptr;
+}
