@@ -39,4 +39,7 @@ class Client {
 		void					addChannel(Channel *channel) {_jointChannels.push_back(channel);}
 		void					addOpChannel(Channel *channel) {_opChannels.push_back(channel);}
 
+		void					removeChannel(Channel *channel);
+		void					removeOpChannel(Channel *channel);
+
 };

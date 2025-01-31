@@ -1,5 +1,5 @@
 #pragma once
-#include "Client.hpp"
+#include "Server.hpp"
 
 class Client;
 
@@ -40,4 +40,10 @@ class Channel {
 		void				setKey(std::string key) {_key = key;}
 		void				setClientLimit(int limit) {_clientLimit = limit;}
 
+		void				removeClient(int cfd);
+		void				removeOp(int cfd);
+		void				addClient(int cfd) {_jointClients.push_back(cfd);}
+		void				removeInvite(int cfd);
+
+		void				broadcast(const std::string& msg, int senderFd, bool excludeSender);
 };

@@ -1,4 +1,4 @@
-# include "Server.hpp"
+#include "Server.hpp"
 
 bool	Server::isClient(std::string nick)
 {
@@ -27,7 +27,6 @@ bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 	if (params.size() > 1 && params.at(1) != "+i" && params.at(1) != "-i" && params.at(1) != "+t" && params.at(1) != "-t"
 		&& params.at(1) != "+k" && params.at(1) != "-k" && params.at(1) != "+o" && params.at(1) != "-o"
 		&& params.at(1) != "+l" && params.at(1) != "-l")
-		// do we need to inform the client about the channel modes...?
 		return (false);
 	return (true);
 }
@@ -37,7 +36,8 @@ void	Server::setInviteStatus(int cfd, Channel &channel, std::string mode)
 	if (mode.front() == '+' && !channel.isInviteOnly())
 	{
 		channel.setInviteOnly(true);
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + mode + "\r\n";
+		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	else if (mode.front() == '-' && channel.isInviteOnly())
 	{
@@ -51,7 +51,8 @@ void	Server::setTopicRestriction(int cfd, Channel &channel, std::string mode)
 	if (mode.front() == '+' && !channel.isTopicRestricted())
 	{
 		channel.setTopicRestricted(true);
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + mode + "\r\n";
+		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	else if (mode.front() == '-' && channel.isTopicRestricted())
 	{
@@ -65,9 +66,14 @@ void	Server::setKey(int cfd, Channel &channel, std::vector<std::string> &params)
 	if (params.at(1).front() == '+')
 	{
 		if (params.size() < 3)
-			//print error
+		{
+			std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+			return ;
+		}
 		channel.setKey(params.at(2));
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + " " + params.at(2) + "\r\n";
+		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	else if (params.at(1).front() == '-' && params.size() < 3)
 	{
@@ -81,13 +87,16 @@ void	Server::setClientLimit(int cfd, Channel &channel, std::vector<std::string> 
 	if (params.at(1).front() == '-' && params.size() < 3)
 	{
 		channel.setClientLimit(-1);
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + "\r\n";
+		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	else if (params.at(1).front() == '+')
 	{
 		if (params.size() < 3)
 		{
-			// print error
+			std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+			return ;
 		}
 		int	limit;
 		try
@@ -96,13 +105,16 @@ void	Server::setClientLimit(int cfd, Channel &channel, std::vector<std::string> 
 		}
 		catch (const std::exception& e)
 		{
-			// print error
 			return ;
 		}
 		if (limit < 0)
-			//print error
+		{
+			return ;
+		}
 		channel.setClientLimit(limit);
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + " " + params.at(2) + "\r\n";
+		//send(cfd, msg.c_str(), msg.length(), 0);
+		channel.broadcast(msg, cfd, false);
 	}
 	
 }
@@ -152,7 +164,7 @@ bool	Server::hasOpRights(int cfd, std::string channelName){
 	return (false);
 }
 
-Channel	&Server::findChannel(Client &op, Client &newOp)
+Channel	*Server::findChannel(Client &op, Client &newOp)
 {
 	std::vector<Channel*>	opChannels = op.getOpChannels();
 	std::vector<Channel*>	jointChannels = newOp.getJointChannels();
@@ -165,7 +177,7 @@ Channel	&Server::findChannel(Client &op, Client &newOp)
 				return (*it);
 		}
 	}
-
+	return (nullptr);
 }
 
 void	Server::setOpRights(int cfd, std::vector<std::string> &params)
@@ -173,7 +185,25 @@ void	Server::setOpRights(int cfd, std::vector<std::string> &params)
 	Client	target;
 
 	getClient(params.at(0), &target);
-	Channel	opChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
+	Channel	*opChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
+	if (opChannel)
+	{
+		if (params.at(1).front() == '-')
+		{
+			opChannel->removeOp(target.getFd());
+			opChannel->addClient(target.getFd());
+			target.removeOpChannel(opChannel);
+			target.addChannel(opChannel);
+		}
+		else if (params.at(1).front() == '+')
+		{
+			opChannel->removeClient(target.getFd());
+			opChannel->addOp(target.getFd());
+			target.removeChannel(opChannel);
+			target.addOpChannel(opChannel);
+		}
+	}
+	// do we need an error here?
 }
 
 void	Server::setMode(int cfd, std::vector<std::string> &params)
@@ -182,7 +212,7 @@ void	Server::setMode(int cfd, std::vector<std::string> &params)
 	{
 		if (hasOpRights(cfd, params.at(0)))
 		{
-			if (!params.at(1).empty())
+			if (params.size() > 1 && !params.at(1).empty())
 			{
 				int	chIndex = getChannelIndex(params.at(0));
 				if (params.at(1).back() == 'o' && chIndex < 0)
@@ -202,8 +232,12 @@ void	Server::setMode(int cfd, std::vector<std::string> &params)
 				return ;
 			}
 		}
-		std::string	msg = ":ircserv 482 " + _clients.at(getClientIndex(cfd)).getUser() + " #" + params.at(0) + " :You're not channel operator\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
+		/*
+		if (params.at(0) != _clients.at(getClientIndex(cfd)).getNick())
+		{
+			std::string	msg = ":ircserv 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :You're not channel operator\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+		} */
 	}
 }
 

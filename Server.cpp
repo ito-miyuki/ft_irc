@@ -29,8 +29,7 @@ void    Server::decrementClientAmount() {
 int	Server::getClientIndex(int fd)
 {
 	int	index = 0;
-	std::vector<Client>::iterator end = _clients.end();
-	for (std::vector<Client>::iterator it = _clients.begin(); it != end; std::advance(it, 1))
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
 	{
 		if (it->getFd() == fd)
 		{
@@ -44,8 +43,7 @@ int	Server::getClientIndex(int fd)
 int	Server::getChannelIndex(std::string name)
 {
 	int	index = 0;
-	std::vector<Channel>::iterator end = _channels.end();
-	for (std::vector<Channel>::iterator it = _channels.begin(); it != end; std::advance(it, 1))
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); std::advance(it, 1))
 	{
 		if (it->getChannelName() == name)
 		{

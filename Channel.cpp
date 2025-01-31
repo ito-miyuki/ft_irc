@@ -29,3 +29,57 @@ Channel	&Channel::operator=(const Channel &other)
 }
 
 Channel::~Channel() {}
+
+void Channel::removeClient(int cfd) {
+
+    std::vector<int>::iterator ite = std::find(_jointClients.begin(), _jointClients.end(), cfd);
+
+    if (ite != _jointClients.end()) {
+        _jointClients.erase(ite);
+    }
+}
+
+void Channel::removeOp(int cfd) {
+
+    std::vector<int>::iterator ite = std::find(_ops.begin(), _ops.end(), cfd);
+
+    if (ite != _ops.end()) {
+        _ops.erase(ite);
+    }
+}
+
+void	Channel::removeInvite(int cfd) {
+
+	std::vector<int>::iterator ite = std::find(_invitedClients.begin(), _invitedClients.end(), cfd);
+
+    if (ite != _invitedClients.end()) {
+        _invitedClients.erase(ite);
+    }
+}
+
+void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender) {
+    // so sender is an operator? How can I loop through the operator list?
+    send(senderFd, msg.c_str(), msg.length(), 0); // send it to the operetor
+
+    if (excludeSender) {
+		for (size_t i = 0; i < _ops.size(); i++) {
+            send(_ops[i], msg.c_str(), msg.length(), 0);
+        }
+        for (size_t i = 0; i < _jointClients.size(); i++) {
+            send(_jointClients[i], msg.c_str(), msg.length(), 0);
+        }
+    } else {
+		for (size_t i = 0; i < _ops.size(); i++) {
+            if (_ops[i] == senderFd) {
+                i++;
+            }
+            send(_ops[i], msg.c_str(), msg.length(), 0);
+        }
+        for (size_t i = 0; i < _jointClients.size(); i++) {
+            if (_jointClients[i] == senderFd) {
+                i++;
+            }
+            send(_jointClients[i], msg.c_str(), msg.length(), 0);
+        }
+    }
+}
