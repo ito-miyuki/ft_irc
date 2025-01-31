@@ -1,5 +1,7 @@
 #pragma once
 #include "Client.hpp"
+#include <algorithm>
+
 
 class Client;
 
@@ -41,5 +43,7 @@ class Channel {
 		void				setKeyStatus(bool status) {_hasKey = status;}
 		void				setTopicRestricted(bool status) {_topicRestricted = status;}
 		void				setKey(std::string key) {_key = key;}
+
+		bool				containSender(int cfd) const {return (std::find(_jointClients.begin(), _jointClients.end(), cfd) != _jointClients.end());};
 
 };
