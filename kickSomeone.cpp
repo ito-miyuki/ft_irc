@@ -65,15 +65,12 @@ void Server::kickSomeone(int cfd, std::string arg) {
     while (iss >> token) {
         tokens.push_back(token);
     }
-
-    // prints out for testing, delete them
-    for (const std::string& token : tokens) {
-        std::cout << "Token: " << token << std::endl;
-    }
-
-    // we might not needed this because irssi don't accept it 
+    
+    // if there are not enough params -> should I use empty()?
     if (tokens.size() < 3) {
-        std::cerr << "At least 3 tokens needed to execute KICK" << std::endl;
+        std::string errMsg = ":server 461 " + userName + " " + "#" + channelName + " :KICK :Not enough parametersl\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging
         return ;
     }
 
@@ -87,7 +84,7 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     std::string userName = tokens[2];
 
-    std::string reason; // reason could be at index 3 or 3 + rest of tokens.
+    std::string reason;
     bool foundColon = false;
 
     for (size_t i = 3; i < tokens.size(); i++) {
@@ -114,25 +111,25 @@ void Server::kickSomeone(int cfd, std::string arg) {
     if (!channelExist(channelName)) {
         std::string errMsg = ":server 403 " + userName + " " + "#" + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging
+        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
     int userFd = getUserFd(userName);
     if (userFd == -1) {
-        std::cout << "There is no such username" << std::endl; // for debugging
+        std::cout << "There is no such username" << std::endl; // for debugging, delete them
         return ;
     }
 
     // if (!userExist(userName)) {
-    //     std::cout << "There is no such username" << std::endl; // for debugging
+    //     std::cout << "There is no such username" << std::endl; // for debugging, delete them
     //     return ;
     // }
 
     if (!isUserInChannel(userName, channelName, userFd)) {
         std::string errMsg = ":server 441 " + userName + " " + "#" + channelName + " :They aren't on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging
+        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
@@ -143,6 +140,9 @@ void Server::kickSomeone(int cfd, std::string arg) {
     } 
 
     channel->removeClient(userFd);
-    channel->broadcast("message here", cfd, true);
+    // need nickname ?
+    std::string kickAnnounce = ":" + userName + "!" + userName + "@localhost KICK " 
+    + channelName + " " + targetName + " :" + reason + "\r\n";
+    channel->broadcast(kickAnnounce, cfd, true);
 }
     
