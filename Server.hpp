@@ -81,10 +81,11 @@ class Server {
 
 		void	kickSomeone(int cfd, std::string arg);
 		bool	channelExist(const std::string& channelName); // should this be in Channel class?
-		// bool	userExist(const std::string& userName); // should this be in Client class?
 		bool	isUserInChannel(const std::string& userName, const std::string& channelName, int userFd); // should this be in other class?
-		int		getUserFd(const std::string& userName); // should this be in other class?
+		int		getUserFdByNick(const std::string& nickName); // should this be in other class?
 		Channel* getChannelObj(const std::string& channelName); // temporary solution
+
+		Client* getClientObjByFd(int fd);
 
 		void	inviteRandos(int cfd, std::string arg);
 		bool	nicknameExist(const std::string& nickname);

@@ -64,7 +64,7 @@ void Server::inviteRandos(int cfd, std::string arg){
         return ; // should I do something before return?
     }
 
-    int userFd = getUserFd(nickName);
+    int userFd = getUserFdByNick(nickName);
     if (userFd == -1) {
         std::cout << "There is no such username" << std::endl; // for debugging
         return ;

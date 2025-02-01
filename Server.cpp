@@ -57,6 +57,7 @@ void Server::setSignal(bool value) {
 
 // this is a temporary solution
 Channel* Server::getChannelObj(const std::string& channelName) {
+	// is auto ok?
     auto it = std::find_if(_channels.begin(), _channels.end(),
         [&channelName](const Channel& ch) { return ch.getChannelName() == channelName; });
 
@@ -64,4 +65,13 @@ Channel* Server::getChannelObj(const std::string& channelName) {
         return &(*it);
     }
     return nullptr;
+}
+
+Client* Server::getClientObjByFd(int fd) {
+	for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
+		if (ite->getFd() == fd) {
+			return &(*ite);
+		}
+	}
+	return nullptr;
 }

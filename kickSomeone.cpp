@@ -2,8 +2,8 @@
 #include <algorithm> // std::find_if are we allowed to use?
 
 bool Server::channelExist(const std::string& channelName) {
-    std::cout << "You are in channelExist()" << std::endl;
-    std::cout << "Total channels in _channels: " << _channels.size() << std::endl;
+    std::cout << "You are in channelExist()" << std::endl; // delete it 
+    std::cout << "Total channels in _channels: " << _channels.size() << std::endl; // delete it
 
     for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
         std::cout << "channel name that I am looking at is: " << ite->getChannelName() << std::endl;
@@ -15,19 +15,9 @@ bool Server::channelExist(const std::string& channelName) {
     return false;
 }
 
-// bool Server::userExist(const std::string& userName) {
-//     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
-//         if (ite->getUser() == userName) {
-//             std::cout << "Username exist" << std::endl; // do something
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
-int Server::getUserFd(const std::string& userName) {
+int Server::getUserFdByNick(const std::string& nickName) {
     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
-        if (ite->getUser() == userName) {
+        if (ite->getNick() == nickName) {
             return ite->getFd();
         }
     }
@@ -42,7 +32,6 @@ bool Server::isUserInChannel(const std::string& userName, const std::string& cha
 
             std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
             if(found != jointClients.end()) {
-                std::cout << "Username exist!" << std::endl; // do something
                 return true;
             }
             std::cout << "The user '" << userName << "' is not in the channel '" << channelName << "'." << std::endl;
@@ -52,6 +41,8 @@ bool Server::isUserInChannel(const std::string& userName, const std::string& cha
     std::cout << "The channel doesn't exist" << std::endl; // change the message
     return false;
 }
+
+//Usage: KICK #channel nickname reason(reason is optional)
 
 void Server::kickSomeone(int cfd, std::string arg) {
     std::istringstream iss(arg); // converts this string to stream
@@ -65,28 +56,28 @@ void Server::kickSomeone(int cfd, std::string arg) {
     while (iss >> token) {
         tokens.push_back(token);
     }
-    
-    // if there are not enough params -> should I use empty()?
-    if (tokens.size() < 3) {
-        std::string errMsg = ":server 461 " + userName + " " + "#" + channelName + " :KICK :Not enough parametersl\r\n";
-        send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging
-        return ;
-    }
 
-    // assuming that parameter are in correct format /KICK #channel user name
+    std::string targetNick = tokens[2];
     std::string channelName;
+    std::string reason;
+
     if (!tokens[1].empty() && tokens[1].at(0) == '#') {
         channelName = tokens[1].erase(0, 1); // do we need it?
     } else {
         channelName = tokens[1];
     }
 
-    std::string userName = tokens[2];
+    // if there are not enough params -> should I use empty()?
+    if (tokens.size() < 3) {
+        std::string errMsg = ":server 461 " + targetNick + " " + "#" + channelName + " :KICK :Not enough parametersl\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging
+        return ;
+    }
 
-    std::string reason;
+    // assuming that parameter are in correct format /KICK #channel user name
+
     bool foundColon = false;
-
     for (size_t i = 3; i < tokens.size(); i++) {
         if (!foundColon) {
             if (tokens[i][0] == ':') {
@@ -104,30 +95,26 @@ void Server::kickSomeone(int cfd, std::string arg) {
     }
 
     // prints out for testing, delete them
-    std::cout << "Channel name is: " << channelName << std::endl;
-    std::cout << "userName is: " << userName << std::endl;
-    std::cout << "Reason is: " << reason << std::endl;
+    std::cout << "channelName is: " << channelName << std::endl;
+    std::cout << "targetNick is: " << targetNick << std::endl;
+    std::cout << "reason is: " << reason << std::endl;
 
     if (!channelExist(channelName)) {
-        std::string errMsg = ":server 403 " + userName + " " + "#" + channelName + " :No such channel\r\n";
+        std::string errMsg = ":server 403 " + targetNick + " " + "#" + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
-    int userFd = getUserFd(userName);
-    if (userFd == -1) {
+    int targetFd = getUserFdByNick(targetNick);
+    if (targetFd == -1) {
+        // should I send error to the server?
         std::cout << "There is no such username" << std::endl; // for debugging, delete them
         return ;
     }
 
-    // if (!userExist(userName)) {
-    //     std::cout << "There is no such username" << std::endl; // for debugging, delete them
-    //     return ;
-    // }
-
-    if (!isUserInChannel(userName, channelName, userFd)) {
-        std::string errMsg = ":server 441 " + userName + " " + "#" + channelName + " :They aren't on that channel\r\n";
+    if (!isUserInChannel(targetNick, channelName, targetFd)) {
+        std::string errMsg = ":server 441 " + targetNick + " " + "#" + channelName + " :They aren't on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
@@ -135,14 +122,20 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     Channel* channel = getChannelObj(channelName);
     if (!channel) {
-        std::cerr << "Channel '" << channelName << "' does not exist!" << std::endl;
+        std::cerr << "Channel '" << channelName << "' does not exist." << std::endl;
         return;
-    } 
+    }
 
-    channel->removeClient(userFd);
-    // need nickname ?
-    std::string kickAnnounce = ":" + userName + "!" + userName + "@localhost KICK " 
-    + channelName + " " + targetName + " :" + reason + "\r\n";
-    channel->broadcast(kickAnnounce, cfd, true);
+    Client* client = getClientObjByFd(targetFd);
+    if (!client) {
+        std::cerr << "Client '" << targetFd << "' does not exist." << std::endl;
+        return;
+    }
+
+    channel->removeClient(targetFd);
+    std::string targetUsername = client->getUser();
+    std::string kickAnnounce = ":" + targetNick + "!" + targetUsername + "@localhost KICK " 
+    + channelName + " " + targetNick + " :" + reason + "\r\n";
+    channel->broadcast(kickAnnounce, cfd, true); // false?
 }
     
