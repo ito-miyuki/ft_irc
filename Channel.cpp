@@ -31,9 +31,11 @@ Channel	&Channel::operator=(const Channel &other)
 Channel::~Channel() {}
 
 void Channel::removeClient(int cfd) {
+	std::cout << "you are in removeClient()" << std::endl;
 	std::vector<int>::iterator ite = std::find(_jointClients.begin(), _jointClients.end(), cfd);
 
     if (ite != _jointClients.end()) {
+		std::cout << "we are about to remove you!" << std::endl;
         _jointClients.erase(ite);
     }
 }
