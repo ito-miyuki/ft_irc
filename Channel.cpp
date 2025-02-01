@@ -1,9 +1,14 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string name, Client &op, std::string key) : _name(name), _topic(""), _op(&op), _clientLimit(-1), _inviteOnly(false), _hasKey(false), _topicRestricted(false), _key(key)
+Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key("")
 {}
 
-Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _op(other.getOp()), _clientLimit(other.getClientLimit()), _jointClients(other._jointClients), _invitedClients(other._invitedClients), _inviteOnly(other.isInviteOnly()), _hasKey(other.hasKey()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
+Channel::Channel(std::string name, int op, std::string key) : _name(name), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key(key)
+{
+	_ops.push_back(op);
+}
+
+Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _ops(other._ops), _clientLimit(other.getClientLimit()), _jointClients(other._jointClients), _invitedClients(other._invitedClients), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
 {}
 
 Channel	&Channel::operator=(const Channel &other)
@@ -12,12 +17,11 @@ Channel	&Channel::operator=(const Channel &other)
 	{
 		_name = other.getChannelName();
 		_topic = other.getTopic();
-		_op = other.getOp();
+		_ops = other._ops;
 		_clientLimit = other.getClientLimit();
 		_jointClients = other._jointClients;
 		_invitedClients = other._invitedClients;
 		_inviteOnly = other.isInviteOnly();
-		_hasKey = other.hasKey();
 		_topicRestricted = other.isTopicRestricted();
 		_key = other.getKey();
 	}
@@ -25,3 +29,55 @@ Channel	&Channel::operator=(const Channel &other)
 }
 
 Channel::~Channel() {}
+
+void Channel::removeClient(int cfd) {
+
+    std::vector<int>::iterator ite = std::find(_jointClients.begin(), _jointClients.end(), cfd);
+
+    if (ite != _jointClients.end()) {
+        _jointClients.erase(ite);
+    }
+}
+
+void Channel::removeOp(int cfd) {
+
+    std::vector<int>::iterator ite = std::find(_ops.begin(), _ops.end(), cfd);
+
+    if (ite != _ops.end()) {
+        _ops.erase(ite);
+    }
+}
+
+void	Channel::removeInvite(int cfd) {
+
+	std::vector<int>::iterator ite = std::find(_invitedClients.begin(), _invitedClients.end(), cfd);
+
+    if (ite != _invitedClients.end()) {
+        _invitedClients.erase(ite);
+    }
+}
+
+void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender) {
+
+    if (excludeSender) {
+		for (size_t i = 0; i < _ops.size(); i++) {
+            send(_ops[i], msg.c_str(), msg.length(), 0);
+        }
+        for (size_t i = 0; i < _jointClients.size(); i++) {
+            send(_jointClients[i], msg.c_str(), msg.length(), 0);
+        }
+    } else {
+		for (size_t i = 0; i < _ops.size(); i++) {
+            if (_ops[i] == senderFd) {
+                i++;
+            }
+            send(_ops[i], msg.c_str(), msg.length(), 0);
+        }
+        for (size_t i = 0; i < _jointClients.size(); i++) {
+            if (_jointClients[i] == senderFd) {
+                i++;
+            }
+            send(_jointClients[i], msg.c_str(), msg.length(), 0);
+        }
+    }
+}

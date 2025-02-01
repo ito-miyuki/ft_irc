@@ -43,7 +43,7 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 2:
 			//setTopic();
 		case 3:
-			//changeMyModesBaby();
+			return (mode(cfd, arg));
 		case 4:
 			return (join(cfd, arg));
 		case 5:
