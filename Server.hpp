@@ -69,17 +69,14 @@ class Server {
 		void	verifyNick(int cfd, std::string newNick);
 		void	join(int cfd, std::string arg);
 		std::string		parseChannelInfo(std::string channels);
-		//void	verifyChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys);
-		//bool	isValidName(std::string channel);
 		void	addNewChannel(int cfd, std::string channelName, std::string channelKey);
 		void	joinChannel(int cfd, std::vector<std::string> &params);
 		bool	isInvited(int cfd, std::vector<int> &invitedClients);
 		bool	alreadyJoint(int cfd, std::vector<int> &jointClients);
-		void	checkKey(int cfd, Channel &channel, std::string key, bool *canJoin);
-		void	checkInvite(int cfd, Channel &channel, bool *canJoin);
-		void	checkLimit(int cfd, Channel &channel, bool *canJoin);
+		bool	checkKey(int cfd, Channel &channel, std::string key);
+		bool	checkInvite(int cfd, Channel &channel);
+		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
-		void	welcomeClientv2(int cfd, Channel &channel, Client &client);
 		void	leaveAllChannels(int cfd);
 
 		void	mode(int cfd, std::string arg);

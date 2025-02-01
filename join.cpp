@@ -16,49 +16,46 @@ bool	Server::alreadyJoint(int cfd, std::vector<int> &jointClients)
 	return (false);
 }
 
-void	Server::checkKey(int cfd, Channel &channel, std::string key, bool *canJoin)
+bool	Server::checkKey(int cfd, Channel &channel, std::string key)
 {
 	if (!key.empty())
 	{
-		*canJoin = channel.getKey() == key;
-		if (!canJoin)
+		if (channel.getKey() != key)
 		{
 			std::string msg = ":ircserv 475 " + _clients.at(getClientIndex(cfd)).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+k)\r\n"; //find out if IRC stops processing the whole command if error is found...
 			send(cfd, msg.c_str(), msg.length(), 0);
+			return (false);
 		}
 	}
-	else
-		*canJoin = true;
+	return (true);
 }
 
-void	Server::checkInvite(int cfd, Channel &channel, bool *canJoin)
+bool	Server::checkInvite(int cfd, Channel &channel)
 {
 	if (channel.isInviteOnly())
 	{
-		*canJoin = isInvited(cfd, channel.getInvitedClients());
-		if (!canJoin)
+		if (!isInvited(cfd, channel.getInvitedClients()))
 		{
 			std::string msg = ":ircserv 473 " + _clients.at(getClientIndex(cfd)).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+i)\r\n"; //find out if IRC stops processing the whole command if error is found...
 			send(cfd, msg.c_str(), msg.length(), 0);
+			return (false);
 		}
 	}
-	else
-		*canJoin = true;
+	return (true);
 }
 
-void	Server::checkLimit(int cfd, Channel &channel, bool *canJoin)
+bool	Server::checkLimit(int cfd, Channel &channel)
 {
 	if (channel.getClientLimit() != -1)
 	{
-		*canJoin = static_cast<std::size_t>(channel.getClientLimit()) < (channel.getJointClients().size() + channel.getOps().size());
-		if (!canJoin)
+		if (static_cast<std::size_t>(channel.getClientLimit()) <= (channel.getJointClients().size() + channel.getOps().size()))
 		{
 			std::string msg = ":ircserv 471 " + _clients.at(getClientIndex(cfd)).getNick() + " " + channel.getChannelName() + " :Cannot join channel (+l)\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
+			return (false);
 		}
 	}
-	else
-		*canJoin = true;
+	return (true);
 }
 
 void	Server::welcomeClient(int cfd, Channel &channel, Client &client)
@@ -67,10 +64,10 @@ void	Server::welcomeClient(int cfd, Channel &channel, Client &client)
 	send(cfd, msg.c_str(), msg.length(), 0);
 	if (!channel.getTopic().empty())
 	{
-		msg = ": 332 " + client.getNick() + " @ " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
+		msg = ":ircserv 332 " + client.getNick() + " @ " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 	}
-	msg = ": 353 " + client.getNick() + " @ " + channel.getChannelName() + " :";
+	msg = ":ircserv 353 " + client.getNick() + " @ " + channel.getChannelName() + " :";
 	std::vector<int>	jointClients = channel.getJointClients();
 	if (!jointClients.empty())
 	{
@@ -92,49 +89,15 @@ void	Server::welcomeClient(int cfd, Channel &channel, Client &client)
 	msg.pop_back();
 	msg = msg + "\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
-	msg = ": 366 " + client.getNick() + " " + channel.getChannelName() + " :End of /NAMES list\r\n";
+	msg = ":ircserv 366 " + client.getNick() + " " + channel.getChannelName() + " :End of /NAMES list\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
 }
 
-void	Server::welcomeClientv2(int cfd, Channel &channel, Client &client)
-{
-	std::string msg = ":" + client.getNick() + "!~" + client.getUser() + "@" + client.getIPa() + " JOIN " + channel.getChannelName() + "\r\n";
-	send(cfd, msg.c_str(), msg.length(), 0);
-	if (!channel.getTopic().empty())
-	{
-		msg = ": 332 " + client.getNick() + " @ " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
-	}
-	msg = ": 353 " + client.getNick() + " = " + channel.getChannelName() + " :";
-	std::vector<int>	jointClients = channel.getJointClients();
-	if (!jointClients.empty())
-	{
-		for (std::vector<int>::iterator it = jointClients.begin(); it != jointClients.end(); std::advance(it, 1))
-		{
-			int	cIndex = getClientIndex(*it);
-			msg = msg + _clients.at(cIndex).getNick() + " ";
-		}
-	}
-	std::vector<int>	ops = channel.getOps();
-	if (!ops.empty())
-	{
-		for (std::vector<int>::iterator it = ops.begin(); it != ops.end(); std::advance(it, 1))
-		{
-			int	cIndex = getClientIndex(*it);
-			msg = msg + "@" + _clients.at(cIndex).getNick() + " ";
-		}
-	}
-	msg.pop_back();
-	msg = msg + "\r\n";
-	send(cfd, msg.c_str(), msg.length(), 0);
-	msg = ": 366 " + client.getNick() + " " + channel.getChannelName() + " :End of /NAMES list\r\n";
-	send(cfd, msg.c_str(), msg.length(), 0);
-}
 
 void	Server::addNewChannel(int cfd, std::string channelName, std::string channelKey)
 {
 	std::string	key = "";
-	Client	client = _clients.at(getClientIndex(cfd));
+	Client	&client = _clients.at(getClientIndex(cfd));
 
 	if (!channelKey.empty())
 		key = channelKey;
@@ -146,7 +109,6 @@ void	Server::addNewChannel(int cfd, std::string channelName, std::string channel
 
 void	Server::joinChannel(int cfd, std::vector<std::string> &params)
 {
-	bool		canJoin = false;
 	int			channelIndex = getChannelIndex(params.at(0));
 	std::string	key = "";
 
@@ -154,20 +116,17 @@ void	Server::joinChannel(int cfd, std::vector<std::string> &params)
 		key = params.at(1);
 	if (channelIndex > -1)
 	{
-		Channel	channel = _channels.at(channelIndex);
+		Channel	&channel = _channels.at(channelIndex);
 		if (!alreadyJoint(cfd, channel.getJointClients()))
 		{
-			checkKey(cfd, channel, key, &canJoin);
-			checkInvite(cfd, channel, &canJoin);
-			checkLimit(cfd, channel, &canJoin);
-			if (canJoin)
+			if (checkKey(cfd, channel, key) && checkInvite(cfd, channel) && checkLimit(cfd, channel))
 			{
-				Client	client = _clients.at(getClientIndex(cfd));
+				Client	&client = _clients.at(getClientIndex(cfd));
 				client.addChannel(&channel);
 				channel.addClient(cfd);
 				if (isInvited(cfd, channel.getInvitedClients()))
 					channel.removeInvite(cfd);
-				welcomeClientv2(cfd, channel, client);
+				welcomeClient(cfd, channel, client);
 				std::string msg = ":" + client.getNick() + "!" + client.getUser() + "@" + client.getIPa() + " JOIN " + channel.getChannelName() + "\r\n";
 				channel.broadcast(msg, cfd, false);
 			}
@@ -181,7 +140,7 @@ void	Server::joinChannel(int cfd, std::vector<std::string> &params)
 
 void	Server::leaveAllChannels(int cfd)
 {
-	Client	client = _clients.at(getClientIndex(cfd));
+	Client	&client = _clients.at(getClientIndex(cfd));
 	std::string msg = ":" + client.getNick() + "!" + client.getUser() + "@" + client.getIPa() + " PART ";
 
 	if (!client.getOpChannels().empty())

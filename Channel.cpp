@@ -58,8 +58,6 @@ void	Channel::removeInvite(int cfd) {
 }
 
 void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender) {
-    // so sender is an operator? How can I loop through the operator list?
-    send(senderFd, msg.c_str(), msg.length(), 0); // send it to the operetor
 
     if (excludeSender) {
 		for (size_t i = 0; i < _ops.size(); i++) {

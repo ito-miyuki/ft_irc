@@ -4,7 +4,7 @@ bool	Server::isClient(std::string nick)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
 	{
-		if ((*it).getNick() == nick || (*it).getUser() == nick) // one of these might be unnecessary
+		if ((*it).getNick() == nick)
 			return (true);
 	}
 	return (false);
@@ -37,12 +37,13 @@ void	Server::setInviteStatus(int cfd, Channel &channel, std::string mode)
 	{
 		channel.setInviteOnly(true);
 		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + mode + "\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
+		channel.broadcast(msg, cfd, true);
 	}
 	else if (mode.front() == '-' && channel.isInviteOnly())
 	{
 		channel.setInviteOnly(false);
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + mode + "\r\n";
+		channel.broadcast(msg, cfd, true);
 	}
 }
 
@@ -52,12 +53,13 @@ void	Server::setTopicRestriction(int cfd, Channel &channel, std::string mode)
 	{
 		channel.setTopicRestricted(true);
 		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + mode + "\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
+		channel.broadcast(msg, cfd, true);
 	}
 	else if (mode.front() == '-' && channel.isTopicRestricted())
 	{
 		channel.setTopicRestricted(false);
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + mode + "\r\n";
+		channel.broadcast(msg, cfd, true);
 	}
 }
 
@@ -73,12 +75,13 @@ void	Server::setKey(int cfd, Channel &channel, std::vector<std::string> &params)
 		}
 		channel.setKey(params.at(2));
 		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + " " + params.at(2) + "\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
+		channel.broadcast(msg, cfd, true);
 	}
-	else if (params.at(1).front() == '-' && params.size() < 3)
+	else if (params.at(1).front() == '-')
 	{
 		channel.setKey("");
-		//send info message?
+		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + "\r\n";
+		channel.broadcast(msg, cfd, true);
 	}
 }
 
@@ -88,7 +91,7 @@ void	Server::setClientLimit(int cfd, Channel &channel, std::vector<std::string> 
 	{
 		channel.setClientLimit(-1);
 		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + "\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
+		channel.broadcast(msg, cfd, true);
 	}
 	else if (params.at(1).front() == '+')
 	{
@@ -113,8 +116,7 @@ void	Server::setClientLimit(int cfd, Channel &channel, std::vector<std::string> 
 		}
 		channel.setClientLimit(limit);
 		std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + channel.getChannelName() + " " + params.at(1) + " " + params.at(2) + "\r\n";
-		//send(cfd, msg.c_str(), msg.length(), 0);
-		channel.broadcast(msg, cfd, false);
+		channel.broadcast(msg, cfd, true);
 	}
 	
 }
@@ -219,17 +221,16 @@ void	Server::setMode(int cfd, std::vector<std::string> &params)
 					setOpRights(cfd, params);
 				else
 				{
-					Channel channel = _channels.at(chIndex);
-					if (params.at(1).back() == 'i' && params.empty())
+					Channel &channel = _channels.at(chIndex);
+					if (params.at(1).back() == 'i' && params.size() < 3)
 						setInviteStatus(cfd, channel, params.at(1));
-					else if (params.at(1).back() == 't' && params.empty())
+					else if (params.at(1).back() == 't' && params.size() < 3)
 						setTopicRestriction(cfd, channel, params.at(1));
 					else if (params.at(1).back() == 'k')
 						setKey(cfd, channel, params);
 					else if (params.at(1).back() == 'l')
 						setClientLimit(cfd, channel, params);
 				}
-				return ;
 			}
 		}
 		/*
