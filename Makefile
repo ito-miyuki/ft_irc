@@ -15,11 +15,13 @@ SOURCES := main.cpp\
 			processClientInput.cpp\
 			registerClient.cpp\
 			runCommands.cpp\
+			parser.cpp\
+			pong.cpp\
 			nick.cpp\
 			join.cpp\
-			pong.cpp\
 			kickSomeone.cpp\
-			inviteRandos.cpp
+			inviteRandos.cpp\
+			mode.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

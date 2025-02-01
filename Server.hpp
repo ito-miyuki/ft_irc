@@ -47,6 +47,9 @@ class Server {
 				FAIL
 		};
 
+		void	parser(std::string arg, std::vector<std::string> &params);
+		bool	hasOpRights(int cfd, std::string channelName);
+
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
 		bool	isRegistered(int cfd);
@@ -65,16 +68,28 @@ class Server {
 		void	nick(int cfd, std::string arg);
 		void	verifyNick(int cfd, std::string newNick);
 		void	join(int cfd, std::string arg);
-		void	parseChannelInfo(int cfd, std::string channelNames, std::string keys);
-		void	verifyChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys);
-		bool	isValidName(std::string channel);
-		void	joinChannels(int cfd, std::vector<std::string> &channels, std::vector<std::string> &keys);
+		std::string		parseChannelInfo(std::string channels);
+		void	addNewChannel(int cfd, std::string channelName, std::string channelKey);
+		void	joinChannel(int cfd, std::vector<std::string> &params);
 		bool	isInvited(int cfd, std::vector<int> &invitedClients);
 		bool	alreadyJoint(int cfd, std::vector<int> &jointClients);
-		void	checkKey(int cfd, Channel &channel, std::vector<std::string> &keys, bool *canJoin, int index);
-		void	checkInvite(int cfd, Channel &channel, bool *canJoin);
-		void	checkLimit(int cfd, Channel &channel, bool *canJoin);
-		void	welcomeClient(int cfd, Channel &channel, int channelAmount);
+		bool	checkKey(int cfd, Channel &channel, std::string key);
+		bool	checkInvite(int cfd, Channel &channel);
+		bool	checkLimit(int cfd, Channel &channel);
+		void	welcomeClient(int cfd, Channel &channel, Client &client);
+		void	leaveAllChannels(int cfd);
+
+		void	mode(int cfd, std::string arg);
+		void	setMode(int cfd, std::vector<std::string> &params);
+		bool	verifyParams(int cfd, std::vector<std::string> &params);
+		void	setInviteStatus(int cfd, Channel &channel, std::string mode);
+		void	setTopicRestriction(int cfd, Channel &channel, std::string mode);
+		void	setKey(int cfd, Channel &channel, std::vector<std::string> &params);
+		void	setClientLimit(int cfd, Channel &channel, std::vector<std::string> &params);
+		void	setOpRights(int cfd, std::vector<std::string> &params);
+		bool	isClient(std::string nick);
+		bool	getClient(std::string name, Client *client);
+		Channel	*findChannel(Client &op, Client &newOp);
 
 		void	pingMyPong(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
@@ -90,6 +105,8 @@ class Server {
 		void	inviteRandos(int cfd, std::string arg);
 		bool	nicknameExist(const std::string& nickname);
 		int		getUserFdbyNick(const std::string& nickName);
+		int		getClientIndex(int fd);
+		int		getChannelIndex(std::string name);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
@@ -109,10 +126,6 @@ class Server {
 
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
-
-		Channel	&getChannel(std::string name);
-		Client	&getClient(int fd);
-
 
 		static void setSignal(bool value); // is this a correct place to put?
 };

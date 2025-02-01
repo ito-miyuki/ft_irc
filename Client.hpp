@@ -16,7 +16,7 @@ class Client {
         std::vector<Channel*>   _jointChannels; // channels user is part of
         std::vector<Channel*>   _opChannels; // channels where user is the moderator
     public:
-		//Client();
+		Client();
 		Client(int fd, std::string ipAddress);
         ~Client();
         Client(const Client& other);
@@ -36,5 +36,10 @@ class Client {
         void                    setNickname(std::string nick) {_nickname = nick;}
         void                    setUsername(std::string user) {_username = user;}
         void                    setFd(int fd) {_fd = fd;}
+		void					addChannel(Channel *channel) {_jointChannels.push_back(channel);}
+		void					addOpChannel(Channel *channel) {_opChannels.push_back(channel);}
+
+		void					removeChannel(Channel *channel);
+		void					removeOpChannel(Channel *channel);
 
 };

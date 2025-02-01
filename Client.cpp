@@ -1,7 +1,7 @@
 #include "Client.hpp"
 
-/* Client::Client() : _password(""), _nickname(""), _username(""), _ipA(""), _isRegistered(false), _fd(-1)
-{} */
+Client::Client() : _password(""), _nickname(""), _username(""), _ipA(""), _isRegistered(false), _fd(-1)
+{}
 
 Client::Client(int fd, std::string ipAddress) : _password(""), _nickname(""), _username(""), _ipA(ipAddress), _isRegistered(false), _fd(fd)
 {}
@@ -25,4 +25,28 @@ Client& Client::operator=(const Client& other){
 		_opChannels.assign(other._opChannels.begin(), other._opChannels.end());
     }
     return (*this);
+}
+
+void	Client::removeChannel(Channel *channel)
+{
+	for (std::vector<Channel*>::iterator it = _jointChannels.begin(); it != _jointChannels.end(); std::advance(it, 1))
+	{
+		if ((*it)->getChannelName() == channel->getChannelName())
+		{
+			_jointChannels.erase(it);
+			return ;
+		}
+	}
+}
+
+void	Client::removeOpChannel(Channel *channel)
+{
+	for (std::vector<Channel*>::iterator it = _opChannels.begin(); it != _opChannels.end(); std::advance(it, 1))
+	{
+		if ((*it)->getChannelName() == channel->getChannelName())
+		{
+			_opChannels.erase(it);
+			return ;
+		}
+	}
 }
