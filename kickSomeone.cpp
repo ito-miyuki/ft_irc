@@ -17,11 +17,13 @@ bool Server::channelExist(const std::string& channelName) {
 
 int Server::getUserFdByNick(const std::string& nickName) {
     std::cout << "you are in getUserFdByNick()" << std::endl; // delete it
+
     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
         if (ite->getNick() == nickName) {
             return ite->getFd();
         }
     }
+
     return -1;
 }
 
@@ -31,16 +33,23 @@ bool Server::isUserInChannel(const std::string& userName, const std::string& cha
     for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
         if (ite->getChannelName() == channelName) {
             std::vector<int> jointClients = ite->getJointClients();
+            std::vector<int> operators = ite->getOps();
 
             // for debugging //
             std::cout << "Checking clients in channel '" << channelName << "': ";
             for (size_t i = 0; i < jointClients.size(); i++) {
                 std::cout << jointClients[i] << " ";
             }
+            std::cout << "Checking clients in channel '" << channelName << "': ";
+            for (size_t i = 0; i < operators.size(); i++) {
+                std::cout << operators[i] << " ";
+            }
             // for debugging //
 
             std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
-            if(found != jointClients.end()) {
+            std::vector<int>::iterator foundInOps = std::find(operators.begin(), operators.end(), userFd);
+            
+            if(found != jointClients.end() || foundInOps != operators.end()) {
                 return true;
             }
             std::cout << "The user '" << userName << "' is not in the channel '" << channelName << "'." << std::endl;
@@ -70,15 +79,17 @@ void Server::kickSomeone(int cfd, std::string arg) {
     std::string channelName = tokens[1];
     std::string reason;
 
-    // if (!tokens[1].empty() && tokens[1].at(0) == '#') {
-    //     channelName = tokens[1].erase(0, 1); // do we need it?
-    // } else {
-    //     channelName = tokens[1];
-    // }
+    Client* executorClient = getClientObjByFd(cfd);
+    if (!executorClient) {
+        std::cerr << "executorClient '" << cfd << "' does not exist." << std::endl;
+        return;
+    }
+
+    std::string executorNick = executorClient->getNick();
 
     // if there are not enough params -> should I use empty()?
     if (tokens.size() < 3) {
-        std::string errMsg = ":server 461 " + targetNick + " " + channelName + " :KICK :Not enough parametersl\r\n";
+        std::string errMsg = ":server 461 " + executorNick + " " + channelName + " :KICK :Not enough parametersl\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging
         return ;
@@ -129,6 +140,13 @@ void Server::kickSomeone(int cfd, std::string arg) {
         return ;
     }
 
+    if (!hasOpRights(cfd, channelName)) {
+        std::string errMsg = ":server 482 " + executorNick + " " + channelName + " :You're not channel operator\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging, delete them
+        return ;
+    }
+
     Channel* channel = getChannelObj(channelName);
     if (!channel) {
         std::cerr << "Channel '" << channelName << "' does not exist." << std::endl;
@@ -143,15 +161,9 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     channel->removeClient(targetFd);
 
-    Client* executorClient = getClientObjByFd(cfd);
-    if (!executorClient) {
-        std::cerr << "executorClient '" << cfd << "' does not exist." << std::endl;
-        return;
-    }
-
     std::string targetUsername = targetClient->getUser();
 
-    std::string kickAnnounce = ":" + executorClient->getNick() + "!~" + executorClient->getUser() + "@" + executorClient->getIPa() 
+    std::string kickAnnounce = ":" + executorNick + "!~" + executorClient->getUser() + "@" + executorClient->getIPa() 
     + " KICK " + channel->getChannelName() + " " + targetClient->getNick() 
     + " :" + (reason.empty() ? targetClient->getNick() : reason) + "\r\n";
 
