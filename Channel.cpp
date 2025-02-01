@@ -57,27 +57,60 @@ void	Channel::removeInvite(int cfd) {
     }
 }
 
+/* void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender) {
+
+    if (excludeSender) {
+		if (!_ops.empty()) {
+			for (size_t i = 0; i < _ops.size(); i++) {
+				send(_ops[i], msg.c_str(), msg.length(), 0);
+			}
+		}
+		if (!_jointClients.empty()) {
+			for (size_t i = 0; i < _jointClients.size(); i++) {
+				send(_jointClients[i], msg.c_str(), msg.length(), 0);
+			}
+		}
+    } else {
+		if (!_ops.empty()) {
+			for (size_t i = 0; i < _ops.size(); i++) {
+				if (_ops[i] != senderFd)
+					send(_ops[i], msg.c_str(), msg.length(), 0);
+			}
+		}
+		if (!_jointClients.empty()) {
+			for (size_t i = 0; i < _jointClients.size(); i++) {
+				if (_jointClients[i] != senderFd)
+					send(_jointClients[i], msg.c_str(), msg.length(), 0);
+			}
+		}
+    }
+} */
+
 void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender) {
 
     if (excludeSender) {
-		for (size_t i = 0; i < _ops.size(); i++) {
-            send(_ops[i], msg.c_str(), msg.length(), 0);
-        }
-        for (size_t i = 0; i < _jointClients.size(); i++) {
-            send(_jointClients[i], msg.c_str(), msg.length(), 0);
-        }
+		if (!_ops.empty()) {
+			for (std::vector<int>::iterator it = _ops.begin(); it != _ops.end(); std::advance(it, 1)) {
+				send(*it, msg.c_str(), msg.length(), 0);
+			}
+		}
+		if (!_jointClients.empty()) {
+			for (std::vector<int>::iterator it = _jointClients.begin(); it != _jointClients.end(); std::advance(it, 1)) {
+				send(*it, msg.c_str(), msg.length(), 0);
+			}
+		}
     } else {
-		for (size_t i = 0; i < _ops.size(); i++) {
-            if (_ops[i] == senderFd) {
-                i++;
-            }
-            send(_ops[i], msg.c_str(), msg.length(), 0);
-        }
-        for (size_t i = 0; i < _jointClients.size(); i++) {
-            if (_jointClients[i] == senderFd) {
-                i++;
-            }
-            send(_jointClients[i], msg.c_str(), msg.length(), 0);
-        }
+		if (!_ops.empty()) {
+			for (std::vector<int>::iterator it = _ops.begin(); it != _ops.end(); std::advance(it, 1)) {
+				if (*it != senderFd)
+					send(*it, msg.c_str(), msg.length(), 0);
+			}
+		}
+		if (!_jointClients.empty()) {
+			for (std::vector<int>::iterator it = _jointClients.begin(); it != _jointClients.end(); std::advance(it, 1)) {
+				if (*it != senderFd)
+					send(*it, msg.c_str(), msg.length(), 0);
+			}
+		}
     }
 }

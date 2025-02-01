@@ -29,7 +29,7 @@ Server::Command	Server::identifyCommand(std::string command)
 	return (FAIL);
 }
 
-void	Server::runCommand(int cfd, std::string arg)
+void	Server::runCommand(int cfd, std::string arg, size_t *clientIndex)
 {
 	enum	Command cmd = identifyCommand(arg);
 	int		cmdID = cmd;
@@ -53,7 +53,7 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 7:
 			return (pingMyPong(cfd, arg));
 		case 8:
-			//imSoDONE();
+			return (quit(cfd, arg, clientIndex));
 		default :
 			std::cout << "It doesn't let me compile without this" << std::endl;
 			// unknown command, also errors will go here....?

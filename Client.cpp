@@ -50,3 +50,11 @@ void	Client::removeOpChannel(Channel *channel)
 		}
 	}
 }
+
+void	Client::clearAllChannels()
+{
+	if (!_jointChannels.empty())
+		_jointChannels.clear();
+	if (!_opChannels.empty())
+		_opChannels.clear();
+}

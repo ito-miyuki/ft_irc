@@ -2,7 +2,7 @@ NAME := ircserv
 
 CC := c++
 
-FLAGS := -Wall -Wextra -Werror
+FLAGS := -Wall -Wextra -Werror -g -fsanitize=address
 
 HEADERS := Server.hpp Client.hpp Channel.hpp
 
@@ -19,7 +19,8 @@ SOURCES := main.cpp\
 			pong.cpp\
 			nick.cpp\
 			join.cpp\
-			mode.cpp
+			mode.cpp\
+			quit.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

@@ -138,28 +138,33 @@ void	Server::joinChannel(int cfd, std::vector<std::string> &params)
 	}
 }
 
-void	Server::leaveAllChannels(int cfd)
+/* void	Server::leaveAllChannels(int cfd)
 {
 	Client	&client = _clients.at(getClientIndex(cfd));
-	std::string msg = ":" + client.getNick() + "!" + client.getUser() + "@" + client.getIPa() + " PART ";
+	std::string msg = ":" + client.getNick() + "!~" + client.getUser() + "@" + client.getIPa() + " PART ";
 
 	if (!client.getOpChannels().empty())
 	{
 		for (std::vector<Channel*>::iterator it = client.getOpChannels().begin(); it != client.getOpChannels().end(); std::advance(it, 1))
 		{
-			msg = msg + "#" + (*it)->getChannelName() + ",";
+			msg = msg + (*it)->getChannelName() + ",";
 		}
+		//client.getOpChannels().erase(client.getOpChannels().begin(), client.getOpChannels().end());
 		client.getOpChannels().clear();
 	}
-	for (std::vector<Channel*>::iterator it = client.getJointChannels().begin(); it != client.getJointChannels().end(); std::advance(it, 1))
+	if (!client.getJointChannels().empty())
 	{
-		msg = msg + "#" + (*it)->getChannelName() + ",";
+		for (std::vector<Channel*>::iterator it = client.getJointChannels().begin(); it != client.getJointChannels().end(); std::advance(it, 1))
+		{
+			msg = msg + (*it)->getChannelName() + ",";
+		}
 	}
 	msg.pop_back();
 	msg = msg + "\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
+	//client.getJointChannels().erase(client.getJointChannels().begin(), client.getJointChannels().end());
 	client.getJointChannels().clear();
-}
+} */
 
 std::string	Server::parseChannelInfo(std::string channels)
 {
@@ -191,10 +196,10 @@ void	Server::join(int cfd, std::string arg)
 		send(cfd, msg.c_str(), msg.length(), 0);
 		return ;
 	}
-	else if (params.at(0).compare("0") == 0 && params.size() == 1)
+	/* else if (params.at(0).compare("#0") == 0 && params.size() == 1)
 	{
 		leaveAllChannels(cfd);
-	}
+	} */
 	else
 	{
 		params.at(0) = parseChannelInfo(params.at(0));

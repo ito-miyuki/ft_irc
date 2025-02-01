@@ -54,7 +54,7 @@ class Server {
 		void	processClientInput(size_t *clientIndex, int cfd);
 		bool	isRegistered(int cfd);
 		void	registerClient(int cfd, std::string arg);
-		void	processInputData(std::stringstream &ss, int cfd);
+		void	processInputData(std::stringstream &ss, int cfd, size_t *clientIndex);
 		void	authenticate(Client &client, std::string arg);
 
 		void	registerPassword(Client& client, std::string arg);
@@ -62,9 +62,10 @@ class Server {
         void    registerUser(Client& client, std::string arg);
 
 		void	eraseClient(int cfd);
+		void	clearChannelData(int cfd, Client &client);
 		bool	isUniqueNick(std::string nick);
 
-		void	runCommand(int cfd, std::string arg);
+		void	runCommand(int cfd, std::string arg, size_t *clientIndex);
 		void	nick(int cfd, std::string arg);
 		void	verifyNick(int cfd, std::string newNick);
 		void	join(int cfd, std::string arg);
@@ -77,7 +78,7 @@ class Server {
 		bool	checkInvite(int cfd, Channel &channel);
 		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
-		void	leaveAllChannels(int cfd);
+		//void	leaveAllChannels(int cfd);
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);
@@ -96,6 +97,12 @@ class Server {
 
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
+
+		void	part(int cfd, Client &client, Channel &channel, std::string reason);
+
+		void	quit(int cfd, std::string arg, size_t *clientIndex);
+		void	notifyChannels(int cfd, std::string msg);
+
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password

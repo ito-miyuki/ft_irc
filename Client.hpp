@@ -41,5 +41,5 @@ class Client {
 
 		void					removeChannel(Channel *channel);
 		void					removeOpChannel(Channel *channel);
-
+		void					clearAllChannels();
 };
