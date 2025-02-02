@@ -23,12 +23,20 @@ void	Server::notifyChannels(int cfd, std::string msg)
 
 void	Server::quit(int cfd, std::string arg, size_t *clientIndex)
 {
-	std::vector<std::string>	params;
+	std::size_t	pos = arg.find(':');
+	std::string	reason;
 
-	parser(arg, params);
-	std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!~" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " QUIT " + params.at(0) + "\r\n";
-	//notifyChannels(cfd, msg);
+	if (pos == std::string::npos)
+	{
+		std::cerr << "Error: cannot process QUIT request" << std::endl;
+		return ;
+	}
+	reason = arg.substr(pos);
+	if (reason.compare(":leaving") == 0)
+		reason = ":Client Quit";
+	std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!~" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " QUIT " + reason + "\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
+	notifyChannels(cfd, msg);
 	clearChannelData(cfd, _clients.at(getClientIndex(cfd)));
 	_clients.at(getClientIndex(cfd)).clearAllChannels();
 	_fds.erase(_fds.begin() + *clientIndex);

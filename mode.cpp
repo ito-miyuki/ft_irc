@@ -148,11 +148,11 @@ bool	Server::hasOpRights(int cfd, std::string channelName){
 	}
 	else if (isClient(channelName))
 	{
-		std::vector<Channel*>	opChannels = _clients.at(getClientIndex(cfd)).getOpChannels();
+		std::vector<Channel*>	&opChannels = _clients.at(getClientIndex(cfd)).getOpChannels();
 		Client	target;
 
 		getClient(channelName, &target);
-		std::vector<Channel*>	jointChannels = target.getJointChannels();
+		std::vector<Channel*>	&jointChannels = target.getJointChannels();
 
 		for (std::vector<Channel*>::iterator it = opChannels.begin(); it != opChannels.end(); std::advance(it, 1))
 		{

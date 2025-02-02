@@ -103,7 +103,7 @@ void	Server::addNewChannel(int cfd, std::string channelName, std::string channel
 		key = channelKey;
 	Channel newChannel(channelName, cfd, key);
 	addChannel(newChannel);
-	client.addOpChannel(&newChannel);
+	client.addOpChannel(&_channels.at(getChannelIndex(channelName)));
 	welcomeClient(cfd, newChannel, client);
 }
 
