@@ -128,8 +128,9 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     int targetFd = getUserFdByNick(targetNick);
     if (targetFd == -1) {
-        // should I send error to the server?
-        std::cout << "There is no such username" << std::endl; // for debugging, delete them
+        std::string errMsg = ":server 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging, delete this
         return ;
     }
 
