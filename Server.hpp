@@ -103,7 +103,7 @@ class Server {
 		Client* getClientObjByFd(int fd);
 
 		void	inviteRandos(int cfd, std::string arg);
-		bool	nicknameExist(const std::string& nickname);
+		// bool	nicknameExist(const std::string& nickname);
 		int		getUserFdbyNick(const std::string& nickName);
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);

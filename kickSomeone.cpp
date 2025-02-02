@@ -63,12 +63,12 @@ bool Server::isUserInChannel(const std::string& userName, const std::string& cha
 //Usage: KICK #channel nickname reason(reason is optional)
 
 void Server::kickSomeone(int cfd, std::string arg) {
+    // prints out for testing, delete it
+    std::cout << "kickSomeone(): cfd is '" << cfd << "' and arg is '" << arg << "'." << std::endl;
+
     std::istringstream iss(arg); // converts this string to stream
     std::vector<std::string> tokens;
     std::string token;
-
-    // prints out for testing, delete it
-    std::cout << "kickSomeone(): cfd is '" << cfd << "' and arg is '" << arg << "'." << std::endl;
 
     // splits the stream by delimiter. default delimiter is space
     while (iss >> token) {
