@@ -87,7 +87,7 @@ void	Server::authenticate(Client &client, std::string arg)
 		send(client.getFd(), msg.c_str(), msg.length(), 0);
 		msg = ":ircserv 002 " + client.getNick() + " :Your host is ircserv, running version 42\r\n";
 		send(client.getFd(), msg.c_str(), msg.length(), 0);
-		msg = ":ircserv 005 " + client.getNick() + " INVITE/MODE/JOIN/KICK/PING/TOPIC/PRIVMSG/NICK/QUIT :are supported by this server\r\n";
+		msg = ":ircserv 005 " + client.getNick() + " INVITE/MODE/JOIN/KICK/TOPIC/MSG/NICK/QUIT :are supported by this server\r\n";
 		send(client.getFd(), msg.c_str(), msg.length(), 0);
 		client.setAsRegistered();
 	}
