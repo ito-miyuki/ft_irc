@@ -1,9 +1,9 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key("")
+Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(true), _key("")
 {}
 
-Channel::Channel(std::string name, int op, std::string key) : _name(name), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(false), _key(key)
+Channel::Channel(std::string name, int op, std::string key) : _name(name), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(true), _key(key)
 {
 	_ops.push_back(op);
 }
