@@ -93,7 +93,14 @@ class Server {
 		Channel	*findChannel(Client &op, Client &newOp);
 
 		void	pingMyPong(int cfd, std::string arg);
+		void	messages(int cfd, std::string arg);
 		Server::Command	identifyCommand(std::string command);
+		void    sendToClient(int cfd, std::string dm, std::string recipient);
+		void    sendToChannel(int cfd, std::string dm, std::string recipient);
+		bool    checkClient(std::string name, Client *client);
+		bool    checkChannel(std::string name, Channel *channel);
+		bool    checkSender(int cfd, Client *client);
+
 
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
@@ -123,5 +130,10 @@ class Server {
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
 
+		Channel		&getChannel(std::string name);
+		Client		&getClient(int fd);
+
 		static void setSignal(bool value); // is this a correct place to put?
+
+
 };

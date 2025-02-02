@@ -19,6 +19,8 @@ SOURCES := main.cpp\
 			pong.cpp\
 			nick.cpp\
 			join.cpp\
+			messages.cpp\
+			channel_helpers.cpp\
 			mode.cpp\
 			quit.cpp
 

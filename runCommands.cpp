@@ -47,7 +47,7 @@ void	Server::runCommand(int cfd, std::string arg, size_t *clientIndex)
 		case 4:
 			return (join(cfd, arg));
 		case 5:
-			//slideIntoMyDMs();
+			return (messages(cfd, arg));
 		case 6:
 			return (nick(cfd, arg));
 		case 7:
