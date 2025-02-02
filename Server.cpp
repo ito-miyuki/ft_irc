@@ -26,27 +26,32 @@ void    Server::decrementClientAmount() {
     _clientAmount--;
 }
 
-Client	&Server::getClient(int fd)
+int	Server::getClientIndex(int fd)
 {
-	std::vector<Client>::iterator end = _clients.end();
-	for (std::vector<Client>::iterator it = _clients.begin(); it != end; std::advance(it, 1))
+	int	index = 0;
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
 	{
 		if (it->getFd() == fd)
-			return (*it);
+		{
+			return (index);
+		}
+		index++;
 	}
-	std::cout << "Couldn't find client" << std::endl;
-	return (*end); // this can cause problems....
+	return (-1);
 }
 
-Channel	&Server::getChannel(std::string name)
+int	Server::getChannelIndex(std::string name)
 {
-	std::vector<Channel>::iterator end = _channels.end();
-	for (std::vector<Channel>::iterator it = _channels.begin(); it != end; std::advance(it, 1))
+	int	index = 0;
+	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); std::advance(it, 1))
 	{
 		if (it->getChannelName() == name)
-			return (*it);
+		{
+			return (index);
+		}
+		index++;
 	}
-	return (*end); // this can cause problems....
+	return (-1);
 }
 
 bool Server::_signal = false;

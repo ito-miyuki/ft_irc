@@ -16,11 +16,12 @@ SOURCES := main.cpp\
 			registerClient.cpp\
 			runCommands.cpp\
 			parser.cpp\
+			pong.cpp\
 			nick.cpp\
 			join.cpp\
-			pong.cpp\
 			messages.cpp\
 			channel_helpers.cpp
+			mode.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
