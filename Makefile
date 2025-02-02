@@ -20,7 +20,7 @@ SOURCES := main.cpp\
 			nick.cpp\
 			join.cpp\
 			messages.cpp\
-			channel_helpers.cpp
+			channel_helpers.cpp\
 			mode.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)

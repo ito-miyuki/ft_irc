@@ -15,7 +15,7 @@ void    Server::sendToClient(int cfd, std::string dm, std::string recipient)
         sendThis = ":" + sender.getNick() + " PRIVMSG " + reci.getNick() + " :" + dm + "\r\n"; 
         send(reci.getFd(), sendThis.c_str(), sendThis.length(), 0);
     } else {
-        sendThis = ":ft_irc 401 " + sender.getNick() + "!" + "~" + sender.getUser() + "@ft_irc" + " " + recipient + " :No such nick/channel\r\n";
+        sendThis = ":ft_irc 401 " + sender.getNick() + "!~" + sender.getUser() + sender.getIPa() + " " + recipient + " :No such nick/channel\r\n";
         send(cfd, sendThis.c_str(), sendThis.length(), 0);
     }
 }
@@ -30,25 +30,20 @@ void    Server::sendToChannel(int cfd, std::string dm, std::string recipient)
     if (checkSender(cfd, &sender)) {
         if (checkChannel(recipient, &channel) == true) {
             if (channel.containSender(cfd)) {
-                sendThis = ":" + sender.getNick() + " #" + channel.getChannelName() + " :" + dm + "\r\n";
-                std::vector<int> reci = channel.getJointClients();
-                for (std::vector<int>::iterator it = reci.begin(); it != reci.end(); std::advance(it, 1))
-                {
-                    if (*it != cfd) {
-                        send(*it, sendThis.c_str(), sendThis.length(), 0); 
-                    }
-                }
+                sendThis = ":" + sender.getNick() + "!~" +  sender.getUser() + "@" + sender.getIPa() + " PRIVMSG " + channel.getChannelName() + " :" + dm + "\r\n";
+                channel.broadcast(sendThis, cfd, false);
             } else {
-                sendThis = ":ft_irc 404 " + sender.getNick() + " #" + channel.getChannelName() + " :Cannot send to channel\r\n";
+                sendThis = ":ft_irc 404 " + sender.getNick() + " " + channel.getChannelName() + " :Cannot send to channel\r\n";
                 send(cfd, sendThis.c_str(), sendThis.length(), 0);
                 return ;
             }
         } else {
-            std::string sendThis = ":ft_irc 401 " + sender.getNick() + " #" + recipient + " :No such nick/channel\r\n";
+            std::string sendThis = ":ft_irc 401 " + sender.getNick() + " " + recipient + " :No such nick/channel\r\n";
             send(cfd, sendThis.c_str(), sendThis.length(), 0);
             return ;
         }
     }
+    std::cerr << "How do you not exist?" << std::endl;
 }
 
 
