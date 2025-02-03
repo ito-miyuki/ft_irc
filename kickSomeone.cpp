@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include <algorithm> // std::find_if are we allowed to use?
 
 //Usage: KICK #channel nickname reason(reason is optional)
 
