@@ -49,22 +49,24 @@ class Server {
 
 		void	parser(std::string arg, std::vector<std::string> &params);
 		bool	hasOpRights(int cfd, std::string channelName);
+		bool	isUserInChannel(const std::string& channelName, int userFd);
 
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
 		bool	isRegistered(int cfd);
-		void	registerClient(int cfd, std::string arg);
-		void	processInputData(std::stringstream &ss, int cfd);
-		void	authenticate(Client &client, std::string arg);
+		void	registerClient(int cfd, std::string arg, size_t *clientIndex);
+		void	processInputData(std::stringstream &ss, int cfd, size_t *clientIndex);
+		void	authenticate(Client &client, std::string arg, size_t *clientIndex);
 
-		void	registerPassword(Client& client, std::string arg);
+		void	registerPassword(Client& client, std::string arg, size_t *clientIndex);
         void	registerNickname(Client& client, std::string arg);
         void    registerUser(Client& client, std::string arg);
 
-		void	eraseClient(int cfd);
+		void	eraseClient(int cfd, size_t *clientIndex);
+		void	removeClientFromChannels(int cfd);
 		bool	isUniqueNick(std::string nick);
 
-		void	runCommand(int cfd, std::string arg);
+		void	runCommand(int cfd, std::string arg, size_t *clientIndex);
 		void	nick(int cfd, std::string arg);
 		void	verifyNick(int cfd, std::string newNick);
 		void	join(int cfd, std::string arg);
@@ -77,7 +79,6 @@ class Server {
 		bool	checkInvite(int cfd, Channel &channel);
 		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
-		void	leaveAllChannels(int cfd);
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);
@@ -89,7 +90,7 @@ class Server {
 		void	setOpRights(int cfd, std::vector<std::string> &params);
 		bool	isClient(std::string nick);
 		bool	getClient(std::string name, Client *client);
-		Channel	*findChannel(Client &op, Client &newOp);
+		std::string	findChannel(Client &op, Client &newOp);
 
 		void	pingMyPong(int cfd, std::string arg);
 		void	messages(int cfd, std::string arg);
@@ -114,6 +115,10 @@ class Server {
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
 
+		void	quit(int cfd, std::string arg, size_t *clientIndex);
+		void	notifyChannels(int cfd, std::string msg);
+		void	removeDeadChannels();
+
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
         ~Server();
@@ -132,9 +137,6 @@ class Server {
 
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
-
-		Channel		&getChannel(std::string name);
-		Client		&getClient(int fd);
 
 		static void setSignal(bool value); // is this a correct place to put?
 

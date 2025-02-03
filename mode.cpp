@@ -18,7 +18,7 @@ bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 	{
 		if (!isClient(params.at(0)))
 		{
-			std::string msg = ":ircserv 403 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :No such channel\r\n";
+			std::string msg = ":ft_irc 403 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :No such channel\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return (false);
 		}
@@ -69,7 +69,7 @@ void	Server::setKey(int cfd, Channel &channel, std::vector<std::string> &params)
 	{
 		if (params.size() < 3)
 		{
-			std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+			std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return ;
 		}
@@ -97,7 +97,7 @@ void	Server::setClientLimit(int cfd, Channel &channel, std::vector<std::string> 
 	{
 		if (params.size() < 3)
 		{
-			std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+			std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return ;
 		}
@@ -135,6 +135,21 @@ bool    Server::getClient(std::string name, Client *client)
     return (false);
 }
 
+std::string	Server::findChannel(Client &op, Client &newOp)
+{
+	std::vector<std::string>	result;
+	std::vector<std::string>	opChannels = op.getOpChannels();
+	std::vector<std::string>	jointChannels = newOp.getJointChannels();
+
+	std::sort(opChannels.begin(), opChannels.end());
+	std::sort(jointChannels.begin(), jointChannels.end());
+
+	std::set_intersection(opChannels.begin(), opChannels.end(), jointChannels.begin(), jointChannels.end(), std::back_inserter(result));
+	if (!result.empty())
+		return (result.at(0));
+	return ("");
+}
+
 bool	Server::hasOpRights(int cfd, std::string channelName){
 
 	int	chIndex = getChannelIndex(channelName);
@@ -148,38 +163,14 @@ bool	Server::hasOpRights(int cfd, std::string channelName){
 	}
 	else if (isClient(channelName))
 	{
-		std::vector<Channel*>	opChannels = _clients.at(getClientIndex(cfd)).getOpChannels();
 		Client	target;
 
 		getClient(channelName, &target);
-		std::vector<Channel*>	jointChannels = target.getJointChannels();
-
-		for (std::vector<Channel*>::iterator it = opChannels.begin(); it != opChannels.end(); std::advance(it, 1))
-		{
-			for (std::vector<Channel*>::iterator ite = jointChannels.begin(); ite != jointChannels.end(); std::advance(it, 1))
-			{
-				if (*it == *ite)
-					return (true);
-			}
-		}
+		std::string	commonChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
+		if (!commonChannel.empty())
+			return (true);
 	}
 	return (false);
-}
-
-Channel	*Server::findChannel(Client &op, Client &newOp)
-{
-	std::vector<Channel*>	opChannels = op.getOpChannels();
-	std::vector<Channel*>	jointChannels = newOp.getJointChannels();
-
-	for (std::vector<Channel*>::iterator it = opChannels.begin(); it != opChannels.end(); std::advance(it, 1))
-	{
-		for (std::vector<Channel*>::iterator ite = jointChannels.begin(); ite != jointChannels.end(); std::advance(it, 1))
-		{
-			if (*it == *ite)
-				return (*it);
-		}
-	}
-	return (nullptr);
 }
 
 void	Server::setOpRights(int cfd, std::vector<std::string> &params)
@@ -187,22 +178,25 @@ void	Server::setOpRights(int cfd, std::vector<std::string> &params)
 	Client	target;
 
 	getClient(params.at(0), &target);
-	Channel	*opChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
-	if (opChannel)
+	std::string channelName = findChannel(_clients.at(getClientIndex(cfd)), target);
+
+	if (!channelName.empty())
 	{
+		Channel	&opChannel = _channels.at(getChannelIndex(channelName));
+		
 		if (params.at(1).front() == '-')
 		{
-			opChannel->removeOp(target.getFd());
-			opChannel->addClient(target.getFd());
-			target.removeOpChannel(opChannel);
-			target.addChannel(opChannel);
+			opChannel.removeOp(target.getFd());
+			opChannel.addClient(target.getFd());
+			target.removeOpChannel(opChannel.getChannelName());
+			target.addChannel(opChannel.getChannelName());
 		}
 		else if (params.at(1).front() == '+')
 		{
-			opChannel->removeClient(target.getFd());
-			opChannel->addOp(target.getFd());
-			target.removeChannel(opChannel);
-			target.addOpChannel(opChannel);
+			opChannel.removeClient(target.getFd());
+			opChannel.addOp(target.getFd());
+			target.removeChannel(opChannel.getChannelName());
+			target.addOpChannel(opChannel.getChannelName());
 		}
 	}
 	// do we need an error here?
@@ -233,12 +227,14 @@ void	Server::setMode(int cfd, std::vector<std::string> &params)
 				}
 			}
 		}
-		/*
-		if (params.at(0) != _clients.at(getClientIndex(cfd)).getNick())
+		else
 		{
-			std::string	msg = ":ircserv 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :You're not channel operator\r\n";
-			send(cfd, msg.c_str(), msg.length(), 0);
-		} */
+			if (params.at(0) != _clients.at(getClientIndex(cfd)).getNick() && params.size() > 1)
+			{
+				std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :You're not channel operator\r\n";
+				send(cfd, msg.c_str(), msg.length(), 0);
+			}
+		}
 	}
 }
 
@@ -249,7 +245,7 @@ void	Server::mode(int cfd, std::string arg)
 	parser(arg, params);
 	if (params.empty())
 	{
-		std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+		std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 		return ;
 	}
