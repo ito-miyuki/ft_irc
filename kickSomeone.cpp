@@ -28,7 +28,7 @@ void Server::kickSomeone(int cfd, std::string arg) {
     std::string executorNick = executorClient->getNick();
 
     if (tokens.size() < 3) {
-        std::string errMsg = ":server 461 " + executorNick + " " + channelName + " :KICK :Not enough parametersl\r\n";
+        std::string errMsg = ":server 461 " + executorNick + " " + channelName + " :KICK :Not enough parameters\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging
         return ;
@@ -57,7 +57,7 @@ void Server::kickSomeone(int cfd, std::string arg) {
     std::cout << "reason is: " << reason << std::endl;
 
     if (!channelExist(channelName)) {
-        std::string errMsg = ":server 403 " + targetNick + " " + channelName + " :No such channel\r\n";
+        std::string errMsg = ":server 403 " + executorNick + " " + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;

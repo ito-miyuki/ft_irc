@@ -31,14 +31,14 @@ void Server::inviteRandos(int cfd, std::string arg){
     std::string executorNick = executorClient->getNick();
 
     if (tokens.size() < 3) {
-        std::string errMsg = ":server 461 " + executorNick + " " + channelName + " :KICK :Not enough parametersl\r\n";
+        std::string errMsg = ":ft_irc 461 " + executorNick + " " + channelName + " :INVITE :Not enough parameters\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging
         return ;
     }
 
     if (!channelExist(channelName)) {
-        std::string errMsg = ":server 403 " + targetNick + " " + channelName + " :No such channel\r\n";
+        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
@@ -46,28 +46,28 @@ void Server::inviteRandos(int cfd, std::string arg){
 
     int targetFd = getUserFdByNick(targetNick);
     if (targetFd == -1) {
-        std::string errMsg = ":server 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
+        std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete this
         return ;
     }
 
-    if (isUserInChannel(channelName, targetFd)) {
-        std::string errMsg = ":server 443 " + targetNick + " " + channelName + " :is already on channel\r\n";
+    if (!isUserInChannel(channelName, cfd)) {
+        std::string errMsg = ":ft_irc 442 " + executorNick + " " + channelName + " :You're not on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
-    if (!isUserInChannel(channelName, cfd)) {
-        std::string errMsg = ":server 442 " + executorNick + " " + channelName + " :You're not on that channel\r\n";
+    if (isUserInChannel(channelName, targetFd)) {
+        std::string errMsg = ":ft_irc 443 " + executorNick + " " + targetNick + " " + channelName + " :is already on channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
     if (!hasOpRights(cfd, channelName)) {
-        std::string errMsg = ":server 482 " + executorNick + " " + channelName + " :You're not channel operator\r\n";
+        std::string errMsg = ":ft_irc 482 " + executorNick + " " + channelName + " :You're not channel operator\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
@@ -83,8 +83,8 @@ void Server::inviteRandos(int cfd, std::string arg){
 
     std::string invitation = ":" + executorNick + "!~" + executorClient->getUser() + "@" + executorClient->getIPa() 
     + " INVITE " + targetNick + " :" + channel->getChannelName() + "\r\n";
-
     send(targetFd, invitation.c_str(), invitation.length(), 0);
-    // do we want to broadcast??
-    channel->broadcast(invitation, cfd, false); // true or false, think about it again
+
+    std::string successInvite = ":ft_irc 341 " + executorNick + " " + targetNick + " " + channelName + "\r\n";
+    send(cfd, successInvite.c_str(), successInvite.length(), 0);
 }
