@@ -80,3 +80,12 @@ Client* Server::getClientObjByFd(int fd) {
 	}
 	return nullptr;
 }
+
+int Server::getUserFdbyNick(const std::string& nickName) {
+    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
+        if (ite->getNick() == nickName) {
+            return ite->getFd();
+        }
+    }
+    return -1;
+}

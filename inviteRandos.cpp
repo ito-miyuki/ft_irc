@@ -1,27 +1,9 @@
 #include "Server.hpp"
 
-// bool Server::nicknameExist(const std::string& nickname) {
-//     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
-//         if (ite->getNick() == nickname) {
-//             std::cout << "nickname exist" << std::endl; // do something
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
-int Server::getUserFdbyNick(const std::string& nickName) {
-    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
-        if (ite->getNick() == nickName) {
-            return ite->getFd();
-        }
-    }
-    return -1;
-}
-
 /**
  * Invite command
- * Usage: INVITE <nickname> <channel>
+ * Usage: INVITE <nickname> <channel> or
+ * Usage: INVITE <nickname>
 */
 
 void Server::inviteRandos(int cfd, std::string arg){
@@ -54,11 +36,6 @@ void Server::inviteRandos(int cfd, std::string arg){
         std::cout << errMsg << std::endl; // for debugging
         return ;
     }
-
-    // for testing print out, delete them
-    std::cout << "target nickname is " << targetNick << std::endl;
-    std::cout << "channelName is " << channelName << std::endl;
-    std::cout << "executorNick is " << executorNick << std::endl;
 
     if (!channelExist(channelName)) {
         std::string errMsg = ":server 403 " + targetNick + " " + channelName + " :No such channel\r\n";
@@ -102,7 +79,6 @@ void Server::inviteRandos(int cfd, std::string arg){
         return;
     }
 
-    // add the user to the invited list in channel class
     channel->addToInvitedClients(targetFd);
 
     std::string invitation = ":" + executorNick + "!~" + executorClient->getUser() + "@" + executorClient->getIPa() 
