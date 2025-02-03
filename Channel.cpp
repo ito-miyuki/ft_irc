@@ -31,12 +31,23 @@ Channel	&Channel::operator=(const Channel &other)
 Channel::~Channel() {}
 
 void Channel::removeClient(int cfd) {
-
-    std::vector<int>::iterator ite = std::find(_jointClients.begin(), _jointClients.end(), cfd);
+	std::vector<int>::iterator ite = std::find(_jointClients.begin(), _jointClients.end(), cfd);
 
     if (ite != _jointClients.end()) {
         _jointClients.erase(ite);
+        return ;
     }
+    //if clients was not in the _jointClients list, look thorugh the ops list
+    removeOp(cfd);
+}
+
+void Channel::addToInvitedClients(int cfd) {
+	for (size_t i = 0; i < _invitedClients.size(); i++) {
+		if (_invitedClients[i] == cfd) {
+			std::cerr << "User are already in the invited list" << std::endl;
+		}
+	}
+	_invitedClients.push_back(cfd);
 }
 
 void Channel::removeOp(int cfd) {
