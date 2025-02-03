@@ -79,7 +79,6 @@ class Server {
 		bool	checkInvite(int cfd, Channel &channel);
 		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
-		//void	leaveAllChannels(int cfd);
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);
@@ -105,8 +104,6 @@ class Server {
 
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
-
-		void	part(int cfd, Client &client, Channel &channel, std::string reason);
 
 		void	quit(int cfd, std::string arg, size_t *clientIndex);
 		void	notifyChannels(int cfd, std::string msg);

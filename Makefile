@@ -2,7 +2,7 @@ NAME := ircserv
 
 CC := c++
 
-FLAGS := -Wall -Wextra -Werror -g -fsanitize=address
+FLAGS := -Wall -Wextra -Werror
 
 HEADERS := Server.hpp Client.hpp Channel.hpp
 

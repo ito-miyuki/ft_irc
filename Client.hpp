@@ -41,5 +41,4 @@ class Client {
 
 		void					removeChannel(std::string channelName);
 		void					removeOpChannel(std::string channelName);
-		void					clearAllChannels();
 };

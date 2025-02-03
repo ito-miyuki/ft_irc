@@ -18,7 +18,7 @@ bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 	{
 		if (!isClient(params.at(0)))
 		{
-			std::string msg = ":ircserv 403 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :No such channel\r\n";
+			std::string msg = ":ft_irc 403 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :No such channel\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return (false);
 		}
@@ -69,7 +69,7 @@ void	Server::setKey(int cfd, Channel &channel, std::vector<std::string> &params)
 	{
 		if (params.size() < 3)
 		{
-			std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+			std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return ;
 		}
@@ -97,7 +97,7 @@ void	Server::setClientLimit(int cfd, Channel &channel, std::vector<std::string> 
 	{
 		if (params.size() < 3)
 		{
-			std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+			std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return ;
 		}
@@ -227,12 +227,14 @@ void	Server::setMode(int cfd, std::vector<std::string> &params)
 				}
 			}
 		}
-		/*
-		if (params.at(0) != _clients.at(getClientIndex(cfd)).getNick())
+		else
 		{
-			std::string	msg = ":ircserv 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :You're not channel operator\r\n";
-			send(cfd, msg.c_str(), msg.length(), 0);
-		} */
+			if (params.at(0) != _clients.at(getClientIndex(cfd)).getNick() && params.size() > 1)
+			{
+				std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :You're not channel operator\r\n";
+				send(cfd, msg.c_str(), msg.length(), 0);
+			}
+		}
 	}
 }
 
@@ -243,7 +245,7 @@ void	Server::mode(int cfd, std::string arg)
 	parser(arg, params);
 	if (params.empty())
 	{
-		std::string msg = ":ircserv 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+		std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 		return ;
 	}

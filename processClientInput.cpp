@@ -99,8 +99,3 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 	std::stringstream	ss(buffer);
 	processInputData(ss, cfd, clientIndex);
 }
-
-	//send(_fds[clientIndex].fd, buffer, byteRead, 0);
-
-
-					
