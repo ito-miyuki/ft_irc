@@ -81,3 +81,12 @@ void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender
         }
     }
 }
+
+bool	Channel::containSender(int cfd) const 
+{
+    if (std::find(_jointClients.begin(), _jointClients.end(), cfd) != _jointClients.end())
+        return (true);
+    if (std::find(_ops.begin(), _ops.end(), cfd) != _ops.end())
+        return (true);
+    return (false);
+}

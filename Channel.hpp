@@ -1,8 +1,8 @@
 #pragma once
-#include "Client.hpp"
-#include <algorithm>
+# include "Client.hpp"
+# include <algorithm>
 
-#include "Server.hpp"
+# include "Server.hpp"
 
 class Client;
 
@@ -45,7 +45,7 @@ class Channel {
 		void				setKey(std::string key) {_key = key;}
 		void				setClientLimit(int limit) {_clientLimit = limit;}
 
-		bool				containSender(int cfd) const {return (std::find(_jointClients.begin(), _jointClients.end(), cfd) != _jointClients.end());};
+		bool				containSender(int cfd) const;
 
 		void				removeClient(int cfd);
 		void				removeOp(int cfd);
