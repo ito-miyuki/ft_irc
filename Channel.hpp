@@ -43,7 +43,7 @@ class Channel {
 		void				setKey(std::string key) {_key = key;}
 		void				setClientLimit(int limit) {_clientLimit = limit;}
 
-		bool				containSender(int cfd) const {return (std::find(_jointClients.begin(), _jointClients.end(), cfd) != _jointClients.end());};
+		bool				containSender(int cfd) const;
 
 		void				removeClient(int cfd);
 		void				addToInvitedClients(int cfd);
