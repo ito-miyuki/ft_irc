@@ -12,25 +12,6 @@
 	channel.broadcast(msg, cfd, false);
 } */
 
-bool Server::isUserInChannel(const std::string& channelName, int userFd) {
-
-    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
-        if (ite->getChannelName() == channelName) {
-            std::vector<int> jointClients = ite->getJointClients();
-            std::vector<int> operators = ite->getOps();
-
-            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
-            std::vector<int>::iterator foundInOps = std::find(operators.begin(), operators.end(), userFd);
-            
-            if(found != jointClients.end() || foundInOps != operators.end()) {
-                return true;
-            }
-            return false;
-        }
-    }
-    return false;
-}
-
 void	Server::removeClientFromChannels(int cfd)
 {
 	if (!_channels.empty())

@@ -49,7 +49,6 @@ class Server {
 
 		void	parser(std::string arg, std::vector<std::string> &params);
 		bool	hasOpRights(int cfd, std::string channelName);
-		bool	isUserInChannel(const std::string& channelName, int userFd);
 
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
