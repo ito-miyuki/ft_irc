@@ -13,7 +13,7 @@ void	Server::verifyNick(int cfd, std::string newNick)
 	{
 		if (isUniqueNick(newNick))
 		{
-			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " NICK " + newNick + " \r\n";
+			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " NICK " + newNick + "\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			_clients.at(getClientIndex(cfd)).setNickname(newNick);
 		}
@@ -29,19 +29,43 @@ void	Server::nick(int cfd, std::string arg)
 {
 	std::vector<std::string>	params;
 
+	std::cout << "Executing NICK" << std::endl;
 	parser(arg, params);
-	if (params.empty() || params.at(0).empty())
+	if (arg.find("WHOIS") == 0)
 	{
-		std::string msg = ":ft_irc 431 " + _clients.at(getClientIndex(cfd)).getUser() + " :No nickname given\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
-		return ;
+		if (params.empty())
+		{
+			std::string msg = ":ft_irc 461 WHOIS :Not enough parameters\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+		}
+		else if (params.at(0) == _clients.at(getClientIndex(cfd)).getUser())
+		{
+			std::string msg = ":ft_irc 320 " + _clients.at(getClientIndex(cfd)).getUser()  + " " + _clients.at(getClientIndex(cfd)).getNick() + " : Your nickname is " + _clients.at(getClientIndex(cfd)).getNick() + "\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+			msg = ":ft_irc 318 " + _clients.at(getClientIndex(cfd)).getUser()  + " " + _clients.at(getClientIndex(cfd)).getNick() + " :End of /WHOIS list\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+		}
+		else
+		{
+			std::string msg = ":ft_irc 432 " + params.at(0) + " :Erroneus nickname\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+		}
 	}
-	else if (_clients.at(getClientIndex(cfd)).getNick().compare(params.at(0)) == 0)
-	{}
 	else
 	{
-		verifyNick(cfd, params.at(0));
-	} 
+		if (params.empty() || params.at(0).empty())
+		{
+			std::string msg = ":ft_irc 431 " + _clients.at(getClientIndex(cfd)).getNick() + " :No nickname given\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+			return ;
+		}
+		else if (_clients.at(getClientIndex(cfd)).getNick().compare(params.at(0)) == 0)
+		{}
+		else
+		{
+			verifyNick(cfd, params.at(0));
+		} 
+	}
 }
 
 //std::regex	wrongStart("^([#$:#&+%~,])");

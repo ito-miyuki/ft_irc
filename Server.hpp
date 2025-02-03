@@ -93,13 +93,12 @@ class Server {
 
 		void	pingMyPong(int cfd, std::string arg);
 		void	messages(int cfd, std::string arg);
-		Server::Command	identifyCommand(std::string command);
+		Server::Command	identifyCommand(std::string cmd);
 		void    sendToClient(int cfd, std::string dm, std::string recipient);
 		void    sendToChannel(int cfd, std::string dm, std::string recipient);
 		bool    checkClient(std::string name, Client *client);
 		bool    checkChannel(std::string name, Channel *channel);
 		bool    checkSender(int cfd, Client *client);
-
 
 		void	kickSomeone(int cfd, std::string arg);
 		bool	channelExist(const std::string& channelName); // should this be in Channel class?
