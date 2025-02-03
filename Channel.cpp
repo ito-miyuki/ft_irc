@@ -8,8 +8,12 @@ Channel::Channel(std::string name, int op, std::string key) : _name(name), _topi
 	_ops.push_back(op);
 }
 
-Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _ops(other._ops), _clientLimit(other.getClientLimit()), _jointClients(other._jointClients), _invitedClients(other._invitedClients), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
-{}
+Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _clientLimit(other.getClientLimit()), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
+{
+	_ops.assign(other._ops.begin(), other._ops.end());
+	_jointClients.assign(other._jointClients.begin(), other._jointClients.end());
+	_invitedClients.assign(other._invitedClients.begin(), other._invitedClients.end());
+}
 
 Channel	&Channel::operator=(const Channel &other)
 {
@@ -17,10 +21,13 @@ Channel	&Channel::operator=(const Channel &other)
 	{
 		_name = other.getChannelName();
 		_topic = other.getTopic();
-		_ops = other._ops;
+		_ops.assign(other._ops.begin(), other._ops.end());
+		//_ops = other._ops;
 		_clientLimit = other.getClientLimit();
-		_jointClients = other._jointClients;
-		_invitedClients = other._invitedClients;
+		//_jointClients = other._jointClients;
+		_jointClients.assign(other._jointClients.begin(), other._jointClients.end());
+		//_invitedClients = other._invitedClients;
+		_invitedClients.assign(other._invitedClients.begin(), other._invitedClients.end());
 		_inviteOnly = other.isInviteOnly();
 		_topicRestricted = other.isTopicRestricted();
 		_key = other.getKey();
@@ -71,25 +78,29 @@ void	Channel::removeInvite(int cfd) {
 void Channel::broadcast(const std::string& msg, int senderFd, bool excludeSender) {
 
     if (excludeSender) {
-		for (size_t i = 0; i < _ops.size(); i++) {
-            send(_ops[i], msg.c_str(), msg.length(), 0);
-        }
-        for (size_t i = 0; i < _jointClients.size(); i++) {
-            send(_jointClients[i], msg.c_str(), msg.length(), 0);
-        }
+		if (!_ops.empty()) {
+			for (size_t i = 0; i < _ops.size(); i++) {
+				send(_ops[i], msg.c_str(), msg.length(), 0);
+			}
+		}
+		if (!_jointClients.empty()) {
+			for (size_t i = 0; i < _jointClients.size(); i++) {
+				send(_jointClients[i], msg.c_str(), msg.length(), 0);
+			}
+		}
     } else {
-		for (size_t i = 0; i < _ops.size(); i++) {
-            if (_ops[i] == senderFd) {
-                i++;
-            }
-            send(_ops[i], msg.c_str(), msg.length(), 0);
-        }
-        for (size_t i = 0; i < _jointClients.size(); i++) {
-            if (_jointClients[i] == senderFd) {
-                i++;
-            }
-            send(_jointClients[i], msg.c_str(), msg.length(), 0);
-        }
+		if (!_ops.empty()) {
+			for (size_t i = 0; i < _ops.size(); i++) {
+				if (_ops[i] != senderFd)
+					send(_ops[i], msg.c_str(), msg.length(), 0);
+			}
+		}
+		if (!_jointClients.empty()) {
+			for (size_t i = 0; i < _jointClients.size(); i++) {
+				if (_jointClients[i] != senderFd)
+					send(_jointClients[i], msg.c_str(), msg.length(), 0);
+			}
+		}
     }
 }
 

@@ -21,7 +21,7 @@ class Channel {
 		std::string			_editer;
 
     public:
-        Channel(); // this may be unnecessary
+        Channel();
 		Channel(std::string name, int op, std::string key);
         ~Channel();
         Channel(const Channel& other);

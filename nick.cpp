@@ -6,7 +6,7 @@ void	Server::verifyNick(int cfd, std::string newNick)
 
 	if (std::regex_match(newNick, incorrect))
 	{
-		std::string msg = ":ircserv 432 " + newNick + " :Erroneus nickname\r\n";
+		std::string msg = ":ft_irc 432 " + newNick + " :Erroneus nickname\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	else
@@ -19,7 +19,7 @@ void	Server::verifyNick(int cfd, std::string newNick)
 		}
 		else
 		{
-			std::string msg = ":ircserv 433 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " \r\n";
+			std::string msg = ":ft_irc 433 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " \r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 		}
 	}
@@ -32,7 +32,7 @@ void	Server::nick(int cfd, std::string arg)
 	parser(arg, params);
 	if (params.empty() || params.at(0).empty())
 	{
-		std::string msg = ":ircserv 431 " + _clients.at(getClientIndex(cfd)).getUser() + " :No nickname given\r\n";
+		std::string msg = ":ft_irc 431 " + _clients.at(getClientIndex(cfd)).getUser() + " :No nickname given\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 		return ;
 	}

@@ -24,7 +24,8 @@ SOURCES := main.cpp\
 			topic.cpp\
 			kickSomeone.cpp\
 			inviteRandos.cpp\
-			mode.cpp
+			mode.cpp\
+			quit.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
