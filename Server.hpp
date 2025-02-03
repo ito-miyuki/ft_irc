@@ -115,6 +115,7 @@ class Server {
 		int		getChannelIndex(std::string name);
 
 		void    topic(int cfd, std::string arg);
+		//void    Server::changeTopic(Channel channel, int cfd, std::string newTopic);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
