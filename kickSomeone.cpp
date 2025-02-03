@@ -1,33 +1,7 @@
 #include "Server.hpp"
 #include <algorithm> // std::find_if are we allowed to use?
 
-bool Server::channelExist(const std::string& channelName) {
-    std::cout << "You are in channelExist()" << std::endl; // delete it 
-    std::cout << "Total channels in _channels: " << _channels.size() << std::endl; // delete it
-
-    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
-        std::cout << "channel name that I am looking at is: " << ite->getChannelName() << std::endl;
-        if (ite->getChannelName() == channelName) {
-            std::cout << "Channel name exist" << std::endl; // do something
-            return true;
-        }
-    }
-    return false;
-}
-
-int Server::getUserFdByNick(const std::string& nickName) {
-    std::cout << "you are in getUserFdByNick()" << std::endl; // delete it
-
-    for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
-        if (ite->getNick() == nickName) {
-            return ite->getFd();
-        }
-    }
-
-    return -1;
-}
-
-bool Server::isUserInChannel(const std::string& userName, const std::string& channelName, int userFd) {
+bool Server::isUserInChannel(const std::string& channelName, int userFd) {
     std::cout << "you are in isUserInChannel()" << std::endl; // delete it
 
     for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
@@ -35,24 +9,12 @@ bool Server::isUserInChannel(const std::string& userName, const std::string& cha
             std::vector<int> jointClients = ite->getJointClients();
             std::vector<int> operators = ite->getOps();
 
-            // for debugging //
-            std::cout << "Checking clients in channel '" << channelName << "': ";
-            for (size_t i = 0; i < jointClients.size(); i++) {
-                std::cout << jointClients[i] << " ";
-            }
-            std::cout << "Checking clients in channel '" << channelName << "': ";
-            for (size_t i = 0; i < operators.size(); i++) {
-                std::cout << operators[i] << " ";
-            }
-            // for debugging //
-
             std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
             std::vector<int>::iterator foundInOps = std::find(operators.begin(), operators.end(), userFd);
             
             if(found != jointClients.end() || foundInOps != operators.end()) {
                 return true;
             }
-            std::cout << "The user '" << userName << "' is not in the channel '" << channelName << "'." << std::endl;
             return false;
         }
     }
@@ -87,7 +49,6 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     std::string executorNick = executorClient->getNick();
 
-    // if there are not enough params -> should I use empty()?
     if (tokens.size() < 3) {
         std::string errMsg = ":server 461 " + executorNick + " " + channelName + " :KICK :Not enough parametersl\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
@@ -134,7 +95,7 @@ void Server::kickSomeone(int cfd, std::string arg) {
         return ;
     }
 
-    if (!isUserInChannel(targetNick, channelName, targetFd)) {
+    if (!isUserInChannel(channelName, targetFd)) {
         std::string errMsg = ":server 441 " + targetNick + " " + channelName + " :They aren't on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
@@ -166,14 +127,14 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     std::string kickAnnounce = ":" + executorNick + "!~" + executorClient->getUser() + "@" + executorClient->getIPa() 
     + " KICK " + channel->getChannelName() + " " + targetClient->getNick() 
-    + " :" + (reason.empty() ? targetClient->getNick() : reason) + "\r\n";
+    + " :" + (reason.empty() ? "" : reason) + "\r\n";
 
     send(targetFd, kickAnnounce.c_str(), kickAnnounce.length(), 0);
     channel->broadcast(kickAnnounce, cfd, false); // true or false, think about it again
 
 
     // for debugging
-    if (isUserInChannel(targetNick, channelName, targetFd)) {
+    if (isUserInChannel(channelName, targetFd)) {
     std::cout << "ERROR: " << targetNick << " is still in the channel " << channelName << " even after removal!" << std::endl;
     } else {
     std::cout << "SUCCESS: " << targetNick << " was successfully removed from " << channelName << "." << std::endl;

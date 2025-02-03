@@ -52,14 +52,14 @@ void Server::inviteRandos(int cfd, std::string arg){
         return ;
     }
 
-    if (isUserInChannel(targetNick, channelName, targetFd)) {
+    if (isUserInChannel(channelName, targetFd)) {
         std::string errMsg = ":server 443 " + targetNick + " " + channelName + " :is already on channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
-    if (!isUserInChannel(executorNick, channelName, cfd)) {
+    if (!isUserInChannel(channelName, cfd)) {
         std::string errMsg = ":server 442 " + executorNick + " " + channelName + " :You're not on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
