@@ -49,20 +49,21 @@ class Server {
 
 		void	parser(std::string arg, std::vector<std::string> &params);
 		bool	hasOpRights(int cfd, std::string channelName);
+		bool	isUserInChannel(const std::string& channelName, int userFd);
 
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
 		bool	isRegistered(int cfd);
-		void	registerClient(int cfd, std::string arg);
+		void	registerClient(int cfd, std::string arg, size_t *clientIndex);
 		void	processInputData(std::stringstream &ss, int cfd, size_t *clientIndex);
-		void	authenticate(Client &client, std::string arg);
+		void	authenticate(Client &client, std::string arg, size_t *clientIndex);
 
-		void	registerPassword(Client& client, std::string arg);
+		void	registerPassword(Client& client, std::string arg, size_t *clientIndex);
         void	registerNickname(Client& client, std::string arg);
         void    registerUser(Client& client, std::string arg);
 
-		void	eraseClient(int cfd);
-		void	clearChannelData(int cfd, Client &client);
+		void	eraseClient(int cfd, size_t *clientIndex);
+		void	removeClientFromChannels(int cfd);
 		bool	isUniqueNick(std::string nick);
 
 		void	runCommand(int cfd, std::string arg, size_t *clientIndex);
@@ -90,7 +91,7 @@ class Server {
 		void	setOpRights(int cfd, std::vector<std::string> &params);
 		bool	isClient(std::string nick);
 		bool	getClient(std::string name, Client *client);
-		Channel	*findChannel(Client &op, Client &newOp);
+		std::string	findChannel(Client &op, Client &newOp);
 
 		void	pingMyPong(int cfd, std::string arg);
 		void	messages(int cfd, std::string arg);
@@ -109,7 +110,7 @@ class Server {
 
 		void	quit(int cfd, std::string arg, size_t *clientIndex);
 		void	notifyChannels(int cfd, std::string msg);
-
+		void	removeDeadChannels();
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
@@ -129,9 +130,6 @@ class Server {
 
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
-
-		Channel		&getChannel(std::string name);
-		Client		&getClient(int fd);
 
 		static void setSignal(bool value); // is this a correct place to put?
 

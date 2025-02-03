@@ -8,8 +8,12 @@ Channel::Channel(std::string name, int op, std::string key) : _name(name), _topi
 	_ops.push_back(op);
 }
 
-Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _ops(other._ops), _clientLimit(other.getClientLimit()), _jointClients(other._jointClients), _invitedClients(other._invitedClients), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
-{}
+Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _clientLimit(other.getClientLimit()), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
+{
+	_ops.assign(other._ops.begin(), other._ops.end());
+	_jointClients.assign(other._jointClients.begin(), other._jointClients.end());
+	_invitedClients.assign(other._invitedClients.begin(), other._invitedClients.end());
+}
 
 Channel	&Channel::operator=(const Channel &other)
 {
@@ -17,10 +21,13 @@ Channel	&Channel::operator=(const Channel &other)
 	{
 		_name = other.getChannelName();
 		_topic = other.getTopic();
-		_ops = other._ops;
+		_ops.assign(other._ops.begin(), other._ops.end());
+		//_ops = other._ops;
 		_clientLimit = other.getClientLimit();
-		_jointClients = other._jointClients;
-		_invitedClients = other._invitedClients;
+		//_jointClients = other._jointClients;
+		_jointClients.assign(other._jointClients.begin(), other._jointClients.end());
+		//_invitedClients = other._invitedClients;
+		_invitedClients.assign(other._invitedClients.begin(), other._invitedClients.end());
 		_inviteOnly = other.isInviteOnly();
 		_topicRestricted = other.isTopicRestricted();
 		_key = other.getKey();

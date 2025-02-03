@@ -12,39 +12,52 @@
 	channel.broadcast(msg, cfd, false);
 } */
 
-void	Server::clearChannelData(int cfd, Client &client)
+bool Server::isUserInChannel(const std::string& channelName, int userFd) {
+
+    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
+        if (ite->getChannelName() == channelName) {
+            std::vector<int> jointClients = ite->getJointClients();
+            std::vector<int> operators = ite->getOps();
+
+            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
+            std::vector<int>::iterator foundInOps = std::find(operators.begin(), operators.end(), userFd);
+            
+            if(found != jointClients.end() || foundInOps != operators.end()) {
+                return true;
+            }
+            return false;
+        }
+    }
+    return false;
+}
+
+void	Server::removeClientFromChannels(int cfd)
 {
-	std::vector<Channel*>	&ops = client.getOpChannels();
-	std::vector<Channel*>	&regular = client.getJointChannels();
-	
-	if (!ops.empty())
+	if (!_channels.empty())
 	{
-		for (std::vector<Channel*>::iterator it = ops.begin(); it != ops.end(); std::advance(it, 1))
+		for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); std::advance(it, 1))
 		{
-			(*it)->removeOp(cfd);
-		}
-	}
-	if (!regular.empty())
-	{
-		for (std::vector<Channel*>::iterator it = regular.begin(); it != regular.end(); std::advance(it, 1))
-		{
-			(*it)->removeClient(cfd);
+			if (isUserInChannel(it->getChannelName(), cfd))
+			{
+				it->removeClient(cfd);
+				it->removeOp(cfd);
+			}
 		}
 	}
 }
 
-void	Server::eraseClient(int cfd)
+void	Server::eraseClient(int cfd, size_t *clientIndex)
 {
 	int	cIndex = getClientIndex(cfd);
 
 	if (cIndex > -1)
 	{
-		Client	&client = _clients.at(cIndex);
-		clearChannelData(cfd, client);
-		std::string msg = "ERROR :Connection timeout\r\n";
-		send(cfd, msg.c_str(), msg.length(), 0);
-		client.clearAllChannels();
+		removeClientFromChannels(cfd);
 		_clients.erase(_clients.begin() + cIndex);
+		_fds.erase(_fds.begin() + *clientIndex);
+		close(cfd);
+		removeDeadChannels();
+		(*clientIndex)--;
 	}
 }
 
@@ -61,7 +74,7 @@ void	Server::processInputData(std::stringstream &ss, int cfd, size_t *clientInde
 			arg.pop_back();
 		if (!isRegistered(cfd))
 		{
-			registerClient(cfd, arg);
+			registerClient(cfd, arg, clientIndex);
 		}
 		else
 		{
@@ -77,10 +90,9 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 
 	if (byteRead <= 0) {
 		std::cout << "Client disconnected: " << cfd << std::endl;
-		_fds.erase(_fds.begin() + *clientIndex);
-		eraseClient(cfd);
-		close(cfd);
-		(*clientIndex)--; // Adjust the loop index due to the removal
+		std::string msg = "ERROR :Connection timeout\r\n";
+		send(cfd, msg.c_str(), msg.length(), 0);
+		eraseClient(cfd, clientIndex);
 		return ;
 	}
 	

@@ -11,7 +11,7 @@ bool	Server::isRegistered(int cfd)
 	return (false);
 }
 
-void	Server::registerPassword(Client& client, std::string arg)
+void	Server::registerPassword(Client& client, std::string arg, size_t *clientIndex)
 {
 	if (arg.compare(0, 5, "PASS ") == 0) {
 		std::string pwd = arg.substr(5, std::string::npos);
@@ -24,7 +24,7 @@ void	Server::registerPassword(Client& client, std::string arg)
 			send(client.getFd(), msg.c_str(), msg.length(), 0);
 			close(client.getFd());
 			std::cerr << "Client provided an incorrect password. Connection terminated." << std::endl; // double checking needed
-			eraseClient(client.getFd());
+			eraseClient(client.getFd(), clientIndex);
 		}
 	}
 }
@@ -73,10 +73,10 @@ void	Server::registerUser(Client& client, std::string arg)
 	}
 }
 
-void	Server::authenticate(Client &client, std::string arg)
+void	Server::authenticate(Client &client, std::string arg, size_t *clientIndex)
 {
 	if (client.getPassword().empty())
-		registerPassword(client, arg);
+		registerPassword(client, arg, clientIndex);
 	if (client.getNick().empty())
 		registerNickname(client, arg);
 	if (client.getUser().empty())
@@ -93,13 +93,13 @@ void	Server::authenticate(Client &client, std::string arg)
 	}
 }
 
-void	Server::registerClient(int cfd, std::string arg)
+void	Server::registerClient(int cfd, std::string arg, size_t *clientIndex)
 {
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); std::advance(it, 1))
 	{
 		if (it->getFd() == cfd)
 		{
-			authenticate(*it, arg); // if something sketchy happens, check this call
+			authenticate(*it, arg, clientIndex); // if something sketchy happens, check this call
 			return ;
 		}
 	}

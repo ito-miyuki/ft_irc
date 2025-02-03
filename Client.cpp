@@ -27,28 +27,20 @@ Client& Client::operator=(const Client& other){
     return (*this);
 }
 
-void	Client::removeChannel(Channel *channel)
+void	Client::removeChannel(std::string channelName)
 {
-	for (std::vector<Channel*>::iterator it = _jointChannels.begin(); it != _jointChannels.end(); std::advance(it, 1))
-	{
-		if ((*it)->getChannelName() == channel->getChannelName())
-		{
-			_jointChannels.erase(it);
-			return ;
-		}
-	}
+	std::vector<std::string>::iterator res = std::find(_jointChannels.begin(), _jointChannels.end(), channelName);
+
+	if (res != _jointChannels.end())
+		_jointChannels.erase(res);
 }
 
-void	Client::removeOpChannel(Channel *channel)
+void	Client::removeOpChannel(std::string channelName)
 {
-	for (std::vector<Channel*>::iterator it = _opChannels.begin(); it != _opChannels.end(); std::advance(it, 1))
-	{
-		if ((*it)->getChannelName() == channel->getChannelName())
-		{
-			_opChannels.erase(it);
-			return ;
-		}
-	}
+	std::vector<std::string>::iterator res = std::find(_opChannels.begin(), _opChannels.end(), channelName);
+
+	if (res != _opChannels.end())
+		_opChannels.erase(res);
 }
 
 void	Client::clearAllChannels()

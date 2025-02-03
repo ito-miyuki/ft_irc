@@ -135,6 +135,21 @@ bool    Server::getClient(std::string name, Client *client)
     return (false);
 }
 
+std::string	Server::findChannel(Client &op, Client &newOp)
+{
+	std::vector<std::string>	result;
+	std::vector<std::string>	opChannels = op.getOpChannels();
+	std::vector<std::string>	jointChannels = newOp.getJointChannels();
+
+	std::sort(opChannels.begin(), opChannels.end());
+	std::sort(jointChannels.begin(), jointChannels.end());
+
+	std::set_intersection(opChannels.begin(), opChannels.end(), jointChannels.begin(), jointChannels.end(), std::back_inserter(result));
+	if (!result.empty())
+		return (result.at(0));
+	return ("");
+}
+
 bool	Server::hasOpRights(int cfd, std::string channelName){
 
 	int	chIndex = getChannelIndex(channelName);
@@ -148,38 +163,14 @@ bool	Server::hasOpRights(int cfd, std::string channelName){
 	}
 	else if (isClient(channelName))
 	{
-		std::vector<Channel*>	&opChannels = _clients.at(getClientIndex(cfd)).getOpChannels();
 		Client	target;
 
 		getClient(channelName, &target);
-		std::vector<Channel*>	&jointChannels = target.getJointChannels();
-
-		for (std::vector<Channel*>::iterator it = opChannels.begin(); it != opChannels.end(); std::advance(it, 1))
-		{
-			for (std::vector<Channel*>::iterator ite = jointChannels.begin(); ite != jointChannels.end(); std::advance(it, 1))
-			{
-				if (*it == *ite)
-					return (true);
-			}
-		}
+		std::string	commonChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
+		if (!commonChannel.empty())
+			return (true);
 	}
 	return (false);
-}
-
-Channel	*Server::findChannel(Client &op, Client &newOp)
-{
-	std::vector<Channel*>	opChannels = op.getOpChannels();
-	std::vector<Channel*>	jointChannels = newOp.getJointChannels();
-
-	for (std::vector<Channel*>::iterator it = opChannels.begin(); it != opChannels.end(); std::advance(it, 1))
-	{
-		for (std::vector<Channel*>::iterator ite = jointChannels.begin(); ite != jointChannels.end(); std::advance(it, 1))
-		{
-			if (*it == *ite)
-				return (*it);
-		}
-	}
-	return (nullptr);
 }
 
 void	Server::setOpRights(int cfd, std::vector<std::string> &params)
@@ -187,22 +178,25 @@ void	Server::setOpRights(int cfd, std::vector<std::string> &params)
 	Client	target;
 
 	getClient(params.at(0), &target);
-	Channel	*opChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
-	if (opChannel)
+	std::string channelName = findChannel(_clients.at(getClientIndex(cfd)), target);
+
+	if (!channelName.empty())
 	{
+		Channel	&opChannel = _channels.at(getChannelIndex(channelName));
+		
 		if (params.at(1).front() == '-')
 		{
-			opChannel->removeOp(target.getFd());
-			opChannel->addClient(target.getFd());
-			target.removeOpChannel(opChannel);
-			target.addChannel(opChannel);
+			opChannel.removeOp(target.getFd());
+			opChannel.addClient(target.getFd());
+			target.removeOpChannel(opChannel.getChannelName());
+			target.addChannel(opChannel.getChannelName());
 		}
 		else if (params.at(1).front() == '+')
 		{
-			opChannel->removeClient(target.getFd());
-			opChannel->addOp(target.getFd());
-			target.removeChannel(opChannel);
-			target.addOpChannel(opChannel);
+			opChannel.removeClient(target.getFd());
+			opChannel.addOp(target.getFd());
+			target.removeChannel(opChannel.getChannelName());
+			target.addOpChannel(opChannel.getChannelName());
 		}
 	}
 	// do we need an error here?

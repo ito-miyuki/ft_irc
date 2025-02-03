@@ -103,7 +103,7 @@ void	Server::addNewChannel(int cfd, std::string channelName, std::string channel
 		key = channelKey;
 	Channel newChannel(channelName, cfd, key);
 	addChannel(newChannel);
-	client.addOpChannel(&_channels.at(getChannelIndex(channelName)));
+	client.addOpChannel(channelName);
 	welcomeClient(cfd, newChannel, client);
 }
 
@@ -122,7 +122,7 @@ void	Server::joinChannel(int cfd, std::vector<std::string> &params)
 			if (checkKey(cfd, channel, key) && checkInvite(cfd, channel) && checkLimit(cfd, channel))
 			{
 				Client	&client = _clients.at(getClientIndex(cfd));
-				client.addChannel(&channel);
+				client.addChannel(params.at(0));
 				channel.addClient(cfd);
 				if (isInvited(cfd, channel.getInvitedClients()))
 					channel.removeInvite(cfd);
