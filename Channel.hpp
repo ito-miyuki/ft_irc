@@ -48,6 +48,7 @@ class Channel {
 		bool				containSender(int cfd) const;
 
 		void				removeClient(int cfd);
+		void				addToInvitedClients(int cfd);
 		void				removeOp(int cfd);
 		void				addClient(int cfd) {_jointClients.push_back(cfd);}
 		void				removeInvite(int cfd);

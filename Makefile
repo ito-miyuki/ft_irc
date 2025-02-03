@@ -21,8 +21,10 @@ SOURCES := main.cpp\
 			join.cpp\
 			messages.cpp\
 			channel_helpers.cpp\
-			mode.cpp\
-			topic.cpp
+			topic.cpp\
+			kickSomeone.cpp\
+			inviteRandos.cpp\
+			mode.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
