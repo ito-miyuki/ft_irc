@@ -60,17 +60,16 @@ void Server::setSignal(bool value) {
         _signal = value;
 }
 
-// this is a temporary solution
-Channel* Server::getChannelObj(const std::string& channelName) {
-	// is auto ok?
-    auto it = std::find_if(_channels.begin(), _channels.end(),
-        [&channelName](const Channel& ch) { return ch.getChannelName() == channelName; });
 
-    if (it != _channels.end()) {
-        return &(*it);
+Channel* Server::getChannelObj(const std::string& channelName) {
+    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
+        if (ite->getChannelName() == channelName) {
+            return &(*ite);
+        }
     }
     return nullptr;
 }
+
 
 Client* Server::getClientObjByFd(int fd) {
 	for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
@@ -114,4 +113,24 @@ int Server::getUserFdByNick(const std::string& nickName) {
     }
 
     return -1;
+}
+
+bool Server::isUserInChannel(const std::string& channelName, int userFd) {
+
+    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
+        if (ite->getChannelName() == channelName) {
+            std::vector<int> jointClients = ite->getJointClients();
+            std::vector<int> operators = ite->getOps();
+
+            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
+            std::vector<int>::iterator foundInOps = std::find(operators.begin(), operators.end(), userFd);
+            
+            if(found != jointClients.end() || foundInOps != operators.end()) {
+                return true;
+            }
+            return false;
+        }
+    }
+    std::cout << "The channel doesn't exist" << std::endl; // change the message
+    return false;
 }

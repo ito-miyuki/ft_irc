@@ -1,27 +1,6 @@
 #include "Server.hpp"
 #include <algorithm> // std::find_if are we allowed to use?
 
-bool Server::isUserInChannel(const std::string& channelName, int userFd) {
-    std::cout << "you are in isUserInChannel()" << std::endl; // delete it
-
-    for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
-        if (ite->getChannelName() == channelName) {
-            std::vector<int> jointClients = ite->getJointClients();
-            std::vector<int> operators = ite->getOps();
-
-            std::vector<int>::iterator found = std::find(jointClients.begin(), jointClients.end(), userFd);
-            std::vector<int>::iterator foundInOps = std::find(operators.begin(), operators.end(), userFd);
-            
-            if(found != jointClients.end() || foundInOps != operators.end()) {
-                return true;
-            }
-            return false;
-        }
-    }
-    std::cout << "The channel doesn't exist" << std::endl; // change the message
-    return false;
-}
-
 //Usage: KICK #channel nickname reason(reason is optional)
 
 void Server::kickSomeone(int cfd, std::string arg) {
@@ -55,8 +34,6 @@ void Server::kickSomeone(int cfd, std::string arg) {
         std::cout << errMsg << std::endl; // for debugging
         return ;
     }
-
-    // assuming that parameter are in correct format /KICK #channel user name
 
     bool foundColon = false;
     for (size_t i = 3; i < tokens.size(); i++) {
