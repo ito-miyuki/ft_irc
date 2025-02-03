@@ -57,15 +57,17 @@ bool	Server::checkLimit(int cfd, Channel &channel)
 	}
 	return (true);
 }
-
+//`:ft_irc 332 client.nick() channel.name() :topic()`
 void	Server::welcomeClient(int cfd, Channel &channel, Client &client)
 {
 	std::string msg = ":" + client.getNick() + "!~" + client.getUser() + "@" + client.getIPa() + " JOIN " + channel.getChannelName() + "\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
-	if (!channel.getTopic().empty())
+	std::cout << "this is the topic of " << channel.getChannelName() << " " << channel.getTopic() << std::endl;
+	if (channel.getTopic().empty() == false)
 	{
-		msg = ":ft_irc 332 " + client.getNick() + " @ " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
+		msg = ":ft_irc 332 " + client.getNick() + " " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
+		std::cout << "topic message was sent" << std::endl;
 	}
 	msg = ":ft_irc 353 " + client.getNick() + " @ " + channel.getChannelName() + " :";
 	std::vector<int>	jointClients = channel.getJointClients();
