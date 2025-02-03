@@ -17,6 +17,8 @@ class Channel {
 		bool				_inviteOnly; // for +i
 		bool				_topicRestricted; // for +t
 		std::string			_key; // channel password
+		std::time_t			_topicUpdated;
+		std::string			_editer;
 
     public:
         Channel(); // this may be unnecessary
@@ -51,4 +53,10 @@ class Channel {
 		void				removeInvite(int cfd);
 
 		void				broadcast(const std::string& msg, int senderFd, bool excludeSender);
+
+		void				setEditer(std::string editor) {_editer = editor;}
+		std::string			getEditer() {return (_editer);}
+
+		void				setTopicUpdated(std::time_t update) {_topicUpdated = update;}
+		std::time_t			getTopicUpdated() {return (_topicUpdated);}
 };

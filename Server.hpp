@@ -104,6 +104,8 @@ class Server {
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
 
+		void    topic(int cfd, std::string arg);
+
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
         ~Server();

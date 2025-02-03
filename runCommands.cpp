@@ -41,7 +41,7 @@ void	Server::runCommand(int cfd, std::string arg)
 		case 1:
 			//inviteRandos();
 		case 2:
-			//setTopic();
+			return (topic(cfd, arg));
 		case 3:
 			return (mode(cfd, arg));
 		case 4:
