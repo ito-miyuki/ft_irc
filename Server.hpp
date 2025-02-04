@@ -44,10 +44,11 @@ class Server {
 				NICK,
 				PING,
 				QUIT,
+				WHOIS,
 				FAIL
 		};
 
-		void	parser(std::string arg, std::vector<std::string> &params);
+		void	parser(std::string arg, std::vector<std::string> &params, char del);
 		bool	hasOpRights(int cfd, std::string channelName);
 
 		void	acceptNewClient();
@@ -68,16 +69,17 @@ class Server {
 		void	runCommand(int cfd, std::string arg, size_t *clientIndex);
 		void	nick(int cfd, std::string arg);
 		void	verifyNick(int cfd, std::string newNick);
+
 		void	join(int cfd, std::string arg);
-		std::string		parseChannelInfo(std::string channels);
 		void	addNewChannel(int cfd, std::string channelName, std::string channelKey);
-		void	joinChannel(int cfd, std::vector<std::string> &params);
+		void	joinChannel(int cfd, std::string channelName, std::string channelKey);
 		bool	isInvited(int cfd, std::vector<int> &invitedClients);
 		bool	alreadyJoint(int cfd, std::vector<int> &jointClients);
 		bool	checkKey(int cfd, Channel &channel, std::string key);
 		bool	checkInvite(int cfd, Channel &channel);
 		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
+		bool	isValidName(std::string channel);
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);
@@ -90,16 +92,16 @@ class Server {
 		bool	isClient(std::string nick);
 		bool	getClient(std::string name, Client *client);
 		std::string	findChannel(Client &op, Client &newOp);
+		std::string	findCommonChannel(int cfd, std::string targetNick);
 
 		void	pingMyPong(int cfd, std::string arg);
 		void	messages(int cfd, std::string arg);
-		Server::Command	identifyCommand(std::string command);
+		Server::Command	identifyCommand(std::string *cmd);
 		void    sendToClient(int cfd, std::string dm, std::string recipient);
 		void    sendToChannel(int cfd, std::string dm, std::string recipient);
 		bool    checkClient(std::string name, Client *client);
 		bool    checkChannel(std::string name, Channel *channel);
 		bool    checkSender(int cfd, Client *client);
-
 
 		void	kickSomeone(int cfd, std::string arg);
 		bool	channelExist(const std::string& channelName); // should this be in Channel class?
@@ -118,6 +120,8 @@ class Server {
 		void	notifyChannels(int cfd, std::string msg);
 		void	removeDeadChannels();
 
+		void	whois(int cfd, std::string arg);
+
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
         ~Server();
@@ -126,8 +130,6 @@ class Server {
 
         int		runServer();
 		void	setServerFd();
-        void	incrementClientAmount() {_clientAmount++;}
-        void	decrementClientAmount();
 
         std::string	getPassword() const {return _password;}
         int			getPort() const {return _port;}

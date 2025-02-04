@@ -35,17 +35,15 @@ void	Server::removeDeadChannels()
 void	Server::quit(int cfd, std::string arg, size_t *clientIndex)
 {
 	std::size_t	pos = arg.find(':');
-	std::string	reason;
+	std::string	reason = "";
 	int			cIndex = getClientIndex(cfd);
 
-	if (pos == std::string::npos)
+	if (pos != std::string::npos)
 	{
-		std::cerr << "Error: cannot process QUIT request" << std::endl;
-		return ;
+		reason = arg.substr(pos);
+		if (reason.compare(":leaving") == 0)
+			reason = ":Client Quit";
 	}
-	reason = arg.substr(pos);
-	if (reason.compare(":leaving") == 0)
-		reason = ":Client Quit";
 	std::string msg = ":" + _clients.at(cIndex).getNick() + "!~" + _clients.at(cIndex).getUser() + "@" + _clients.at(cIndex).getIPa() + " QUIT " + reason + "\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
 	notifyChannels(cfd, msg);
