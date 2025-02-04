@@ -1,17 +1,5 @@
 #include "Server.hpp"
 
-/* void	Server::part(int cfd, Client &client, Channel &channel, std::string reason)
-{
-	std::string msg;
-
-	if (reason.empty())
-		msg = ":" + client.getNick() + "!~" + client.getUser() + "@" + client.getIPa() + " PART " + channel.getChannelName() + "\r\n";
-	else
-		msg = ":" + client.getNick() + "!~" + client.getUser() + "@" + client.getIPa() + " PART " + channel.getChannelName() + " " + reason + "\r\n";
-	send(cfd, msg.c_str(), msg.length(), 0);
-	channel.broadcast(msg, cfd, false);
-} */
-
 void	Server::removeClientFromChannels(int cfd)
 {
 	if (!_channels.empty())
@@ -39,6 +27,7 @@ void	Server::eraseClient(int cfd, size_t *clientIndex)
 		close(cfd);
 		removeDeadChannels();
 		(*clientIndex)--;
+		_clientAmount--;
 	}
 }
 

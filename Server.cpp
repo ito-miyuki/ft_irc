@@ -20,12 +20,6 @@ Server& Server::operator=(const Server& other){
 
 Server::~Server() {}
 
-void    Server::decrementClientAmount() {
-    if (_clientAmount == 0)
-        return ;
-    _clientAmount--;
-}
-
 int	Server::getClientIndex(int fd)
 {
 	int	index = 0;
@@ -104,7 +98,6 @@ bool Server::channelExist(const std::string& channelName) {
 }
 
 int Server::getUserFdByNick(const std::string& nickName) {
-    std::cout << "you are in getUserFdByNick()" << std::endl; // delete it
 
     for (std::vector<Client>::iterator ite = _clients.begin(); ite != _clients.end(); ++ite) {
         if (ite->getNick() == nickName) {

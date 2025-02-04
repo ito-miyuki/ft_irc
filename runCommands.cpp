@@ -1,31 +1,68 @@
 #include "Server.hpp"
 
-Server::Command	Server::identifyCommand(std::string cmd) {
+Server::Command	Server::identifyCommand(std::string *cmd) {
 
-	if (cmd.compare("KICK") == 0 || cmd.compare(0, 5, "KICK ") == 0)
-		return (KICK);
-	if (cmd.compare("INVITE") == 0 || cmd.compare(0, 7, "INVITE ") == 0)
-		return (INVITE);
-	if (cmd.compare("TOPIC") == 0 || cmd.compare(0, 6, "TOPIC ") == 0)
-		return (TOPIC);
-	if (cmd.compare("MODE") == 0 || cmd.compare(0, 5, "MODE ") == 0)
-		return (MODE);
-	if (cmd.compare("JOIN") == 0 || cmd.compare(0, 5, "JOIN ") == 0)
-		return (JOIN);
-	if (cmd.compare("PRIVMSG") == 0 || cmd.compare(0, 8, "PRIVMSG ") == 0)
-		return (PRIVMSG);
-	if (cmd.compare("NICK") == 0 || cmd.compare(0, 5, "NICK ") == 0 || cmd.compare("WHOIS") == 0 || cmd.compare(0, 6, "WHOIS ") == 0)
-		return (NICK);
-	if (cmd.compare("PING") == 0 || cmd.compare(0, 5, "PING ") == 0)
-		return (PING);
-	if (cmd.compare("QUIT") == 0 || cmd.compare(0, 5, "QUIT ") == 0)
-		return (QUIT);
-	return (FAIL);
+	enum	Command command = FAIL;
+	std::size_t		found = 0;
+
+	if ((*cmd).find("KICK") != std::string::npos)
+	{
+		command = KICK;
+		found = (*cmd).find("KICK");
+	}
+	else if ((*cmd).find("INVITE") != std::string::npos)
+	{
+		command = INVITE;
+		found = (*cmd).find("INVITE");
+	}
+	else if ((*cmd).find("TOPIC") != std::string::npos)
+	{
+		command = TOPIC;
+		found = (*cmd).find("TOPIC");
+	}
+	else if ((*cmd).find("MODE") != std::string::npos)
+	{
+		command = MODE;
+		found = (*cmd).find("MODE");
+	}
+	else if ((*cmd).find("JOIN") != std::string::npos)
+	{
+		command = JOIN;
+		found = (*cmd).find("JOIN");
+	}
+	else if ((*cmd).find("PRIVMSG") != std::string::npos)
+	{
+		command = PRIVMSG;
+		found = (*cmd).find("PRIVMSG");
+	}
+	else if ((*cmd).find("NICK") != std::string::npos)
+	{
+		command = NICK;
+		found = (*cmd).find("NICK");
+	}
+	else if ((*cmd).find("PING") != std::string::npos)
+	{
+		command = PING;
+		found = (*cmd).find("PING");
+	}
+	else if ((*cmd).find("QUIT") != std::string::npos)
+	{
+		command = QUIT;
+		found = (*cmd).find("QUIT");
+	}
+	/* else if ((*cmd).find("WHOIS") != std::string::npos)
+	{
+		command = WHOIS;
+		found = (*cmd).find("WHOIS");
+	} */
+	if (found != std::string::npos && found != 0)
+		*cmd = (*cmd).substr(found);
+	return (command);
 }
 
 void	Server::runCommand(int cfd, std::string arg, size_t *clientIndex)
 {
-	enum	Command cmd = identifyCommand(arg);
+	enum	Command cmd = identifyCommand(&arg);
 	int		cmdID = cmd;
 
 	switch (cmdID)
@@ -48,6 +85,8 @@ void	Server::runCommand(int cfd, std::string arg, size_t *clientIndex)
 			return (pingMyPong(cfd, arg));
 		case 8:
 			return (quit(cfd, arg, clientIndex));
+		case 9:
+			//return (whois(cfd, arg));
 		default :
 			std::cout << "Unknown command" << std::endl;
 			// unknown command, also errors will go here....?

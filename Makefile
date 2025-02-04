@@ -18,13 +18,21 @@ SOURCES := main.cpp\
 			parser.cpp\
 			pong.cpp\
 			nick.cpp\
-			join.cpp\
+			join/join.cpp\
+			join/joinUtils.cpp\
 			messages.cpp\
 			channel_helpers.cpp\
 			kickSomeone.cpp\
 			inviteRandos.cpp\
-			mode.cpp\
-			quit.cpp
+			mode/mode.cpp\
+			mode/modeUtils.cpp\
+			mode/setOpRights.cpp\
+			mode/setClientLimit.cpp\
+			mode/setInviteStatus.cpp\
+			mode/setTopicRestriction.cpp\
+			mode/setKey.cpp\
+			quit.cpp\
+			whois.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 
