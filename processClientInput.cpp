@@ -64,7 +64,7 @@ void	Server::processInputData(std::stringstream &ss, int cfd, size_t *clientInde
 	}
 }
 
-std::map<int, std::string> clientBuffers; // trying global variable
+
 
 void	Server::processClientInput(size_t *clientIndex, int cfd)
 {
@@ -81,32 +81,41 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 		return ;
 	}
 
-	// // //new implementing //
+	buffer[byteRead] = '\0';
+	_clientBuffers[cfd] += buffer;
 
-	// buffer[byteRead] = '\0';
-	// clientBuffers[cfd] += buffer;
+	std::cout << "Received buffer: [" << buffer << "]" << std::endl; // Debugging
+    std::cout << "Current buffer: [" << _clientBuffers[cfd] << "]" << std::endl; // Debugging
 
-	// std::cout << "Received buffer: [" << buffer << "]" << std::endl; // Debugging
-    // std::cout << "Current buffer: [" << clientBuffers[cfd] << "]" << std::endl; // Debugging
+	// for debugging
+	std::cout << "Hex dump of buffer: ";
+	for (size_t i = 0; i < _clientBuffers[cfd].size(); i++) {
+    	std::cout << std::hex << (int)(unsigned char)_clientBuffers[cfd][i] << " ";
+	}
+	std::cout << std::dec << std::endl;
+	//
 
-	// if (clientBuffers[cfd].back() != '\n') {
-    //     std::cout << "Waiting for more input..." << std::endl; // for debugging
-    //     return;
-    // }
+	if (_clientBuffers[cfd].back() != '\n') {
+        std::cout << "Waiting for more input..." << std::endl; // for debugging
+        return;
+    }
 
-	// size_t pos;
-	// while ((pos = clientBuffers[cfd].find("\r\n")) != std::string::npos) {
-	// 	std::string command = clientBuffers[cfd].substr(0, pos);
-	// 	clientBuffers[cfd].erase(0, pos + 2);
+	size_t pos;
+	while ((pos = _clientBuffers[cfd].find("\n")) != std::string::npos) {
+		
+		std::string command = _clientBuffers[cfd].substr(0, pos);
 
-	// 	std::cout << "Processing command: " << command << std::endl; // for debugging
+		if (!command.empty() && command.back() == '\r') {
+			command.pop_back();
+		}
 
-	// 	std::stringstream	ss(command);
-	// 	processInputData(ss, cfd, clientIndex);
+		_clientBuffers[cfd].erase(0, pos + 1);
 
-	// }
-	// ////
-	
-	std::stringstream	ss(buffer);
-	processInputData(ss, cfd, clientIndex);
+		std::cout << "Processing command: " << command << std::endl; // for debugging
+
+		std::stringstream	ss(command);
+		processInputData(ss, cfd, clientIndex);
+		
+		std::cout << "processInputData is done!" << std::endl; // for debugging
+	}
 }

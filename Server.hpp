@@ -33,6 +33,7 @@ class Server {
 		std::vector<pollfd>		_fds;
 		size_t					_clientAmount;
 		static bool				_signal; // static is accessable without instance
+		std::map<int, std::string> _clientBuffers;
 
 		enum	Command {
 				KICK,
