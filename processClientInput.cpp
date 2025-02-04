@@ -73,7 +73,12 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 
 	std::cout << "recv() recieved: " << byteRead << std::endl; // for testing 
 
-	if (byteRead <= 0) {
+	if (byteRead == 0) {
+		std::cout << "Waiting for more input..." << std::endl; // for debugging
+        return;
+	}
+	
+	if (byteRead < 0) {
 		std::cout << "Client disconnected: " << cfd << std::endl;
 		std::string msg = "ERROR :Connection timeout\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
