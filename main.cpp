@@ -1,11 +1,16 @@
-#include <iostream>
 #include "Server.hpp"
-#include <exception>
+// #include <exception>
 
 bool isPortValid(const std::string& port) {
 
     if (port.empty()) {
         return false;
+    }
+
+    for (size_t i = 0; i < port.size(); i++) {
+        if (!std::isdigit(port[i])) {
+            return false;
+        }
     }
 
     int portNum;
