@@ -64,10 +64,14 @@ void	Server::processInputData(std::stringstream &ss, int cfd, size_t *clientInde
 	}
 }
 
+std::map<int, std::string> clientBuffers; // trying global variable
+
 void	Server::processClientInput(size_t *clientIndex, int cfd)
 {
 	char buffer[1024] = {0};
 	int byteRead = recv(cfd, buffer, sizeof(buffer), 0);
+
+	std::cout << "recv() recieved: " << byteRead << std::endl; // for testing 
 
 	if (byteRead <= 0) {
 		std::cout << "Client disconnected: " << cfd << std::endl;
@@ -76,6 +80,32 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 		eraseClient(cfd, clientIndex);
 		return ;
 	}
+
+	// // //new implementing //
+
+	// buffer[byteRead] = '\0';
+	// clientBuffers[cfd] += buffer;
+
+	// std::cout << "Received buffer: [" << buffer << "]" << std::endl; // Debugging
+    // std::cout << "Current buffer: [" << clientBuffers[cfd] << "]" << std::endl; // Debugging
+
+	// if (clientBuffers[cfd].back() != '\n') {
+    //     std::cout << "Waiting for more input..." << std::endl; // for debugging
+    //     return;
+    // }
+
+	// size_t pos;
+	// while ((pos = clientBuffers[cfd].find("\r\n")) != std::string::npos) {
+	// 	std::string command = clientBuffers[cfd].substr(0, pos);
+	// 	clientBuffers[cfd].erase(0, pos + 2);
+
+	// 	std::cout << "Processing command: " << command << std::endl; // for debugging
+
+	// 	std::stringstream	ss(command);
+	// 	processInputData(ss, cfd, clientIndex);
+
+	// }
+	// ////
 	
 	std::stringstream	ss(buffer);
 	processInputData(ss, cfd, clientIndex);

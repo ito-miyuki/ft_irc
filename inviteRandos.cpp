@@ -25,17 +25,18 @@ void Server::inviteRandos(int cfd, std::string arg){
         return;
     }
 
-    std::string targetNick = tokens[1];
-    std::string channelName = tokens[2];
-
     std::string executorNick = executorClient->getNick();
 
     if (tokens.size() < 3) {
-        std::string errMsg = ":ft_irc 461 " + executorNick + " " + channelName + " :INVITE :Not enough parameters\r\n";
+        std::string errMsg = ":ft_irc 461 " + executorNick + " :INVITE :Not enough parameters\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging
         return ;
     }
+
+    std::string targetNick = tokens[1];
+    std::string channelName = tokens[2];
+
 
     if (!channelExist(channelName)) {
         std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
