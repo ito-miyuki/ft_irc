@@ -7,6 +7,7 @@
 */
 
 void Server::inviteRandos(int cfd, std::string arg){
+
     std::istringstream iss(arg); // converts this string to stream
     std::vector<std::string> tokens;
     std::string token;
@@ -32,16 +33,15 @@ void Server::inviteRandos(int cfd, std::string arg){
     std::string targetNick = tokens[1];
     std::string channelName = tokens[2];
 
-
-    if (!channelExist(channelName)) {
-        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
+    int targetFd = getUserFdByNick(targetNick);
+    if (targetFd == -1) {
+        std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         return ;
     }
 
-    int targetFd = getUserFdByNick(targetNick);
-    if (targetFd == -1) {
-        std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
+    if (!channelExist(channelName)) {
+        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         return ;
     }
