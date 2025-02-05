@@ -21,7 +21,7 @@ void Server::inviteRandos(int cfd, std::string arg){
 
     Client* executorClient = getClientObjByFd(cfd);
     if (!executorClient) {
-        std::cerr << "executorClient '" << cfd << "' does not exist." << std::endl;
+        //std::cerr << "executorClient '" << cfd << "' does not exist." << std::endl;
         return;
     }
 
@@ -37,18 +37,19 @@ void Server::inviteRandos(int cfd, std::string arg){
     std::string targetNick = tokens[1];
     std::string channelName = tokens[2];
 
-    int targetFd = getUserFdByNick(targetNick);
-    if (targetFd == -1) {
-        std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
-        send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete this
-        return ;
-    }
 
     if (!channelExist(channelName)) {
         std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
+        return ;
+    }
+
+    int targetFd = getUserFdByNick(targetNick);
+    if (targetFd == -1) {
+        std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging, delete this
         return ;
     }
 
