@@ -56,6 +56,13 @@ void Server::kickSomeone(int cfd, std::string arg) {
     std::cout << "targetNick is: " << targetNick << std::endl;
     std::cout << "reason is: " << reason << std::endl;
 
+    if (!channelExist(channelName)) {
+        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging, delete them
+        return ;
+    }
+
     int targetFd = getUserFdByNick(targetNick);
     if (targetFd == -1) {
         std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
@@ -64,8 +71,8 @@ void Server::kickSomeone(int cfd, std::string arg) {
         return ;
     }
 
-    if (!channelExist(channelName)) {
-        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
+    if (!isUserInChannel(channelName, cfd)) {
+        std::string errMsg = ":ft_irc 442 " + executorNick + " " + channelName + " :You're not on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
