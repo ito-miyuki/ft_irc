@@ -6,7 +6,7 @@ void	Server::verifyNick(int cfd, std::string newNick)
 
 	if (std::regex_match(newNick, incorrect))
 	{
-		std::string msg = ":ft_irc 432 " + newNick + " :Erroneus nickname\r\n";
+		std::string msg = ":ft_irc 432 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " :Erroneus nickname\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	else
