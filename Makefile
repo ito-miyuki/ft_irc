@@ -32,8 +32,7 @@ SOURCES := main.cpp\
 			mode/setInviteStatus.cpp\
 			mode/setTopicRestriction.cpp\
 			mode/setKey.cpp\
-			quit.cpp\
-			whois.cpp
+			quit.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

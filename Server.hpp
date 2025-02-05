@@ -123,7 +123,7 @@ class Server {
 		void	notifyChannels(int cfd, std::string msg);
 		void	removeDeadChannels();
 
-		void	whois(int cfd, std::string arg);
+		//void	whois(int cfd, std::string arg);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password

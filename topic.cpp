@@ -3,37 +3,63 @@
 //:sataskin!~sataskin@194.136.126.51 TOPIC #topictester :cat
 //what I get from irssi : TOPIC #channel :new topic
 // std::ctime(&now);
+//std::string response1 = ":ft_irc 332 " + sender.getNick() + " " + recipient + " :" + topic + "\r\n";
+//std::string response2 = ":ft_irc 333 " + sender.getNick() + " " + recipient + " " + topicSetter + " " + std::to_string(topicTimestamp) + "\r\n";
+
 
 void    Server::changeTopic(Channel &channel, int cfd, std::string newTopic)
 {
     int clientIndex = getClientIndex(cfd);
-
     if (clientIndex > -1)
     {
         Client &sender = _clients.at(clientIndex);
-        channel.setTopic(newTopic);
-        std::string broadcastMessage = ":" + sender.getNick() + "!~" + sender.getUser() + "@" + sender.getIPa() + " TOPIC " + channel.getChannelName() + " :" + newTopic + "\r\n"; 
-        channel.broadcast(broadcastMessage, cfd, true);
-        std::time_t now = std::time(nullptr);
-        channel.setTopicUpdated(now);
+        if (newTopic.empty() && !channel.getTopic().empty()) {
+            std::string response1 = ":ft_irc 332 " + sender.getNick() + " " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
+            std::time_t hello = channel.getTopicUpdated();
+            std::string response2 = ":ft_irc 333 " + sender.getNick() + " " + channel.getChannelName() + " " + channel.getEditer() + " " + std::ctime(&hello) + "\r\n";
+
+            send(cfd, response1.c_str(), response1.length(), 0);
+            send(cfd, response2.c_str(), response2.length(), 0);
+        } else if (newTopic.empty()) {
+            std::string response = ":ft_irc 331 " + sender.getNick() + " " + channel.getChannelName() + " :No topic is set\r\n";
+            send(cfd, response.c_str(), response.length(), 0);
+        } else {
+            channel.setTopic(newTopic);
+            std::string broadcastMessage = ":" + sender.getNick() + "!~" + sender.getUser() + "@" + sender.getIPa() + " TOPIC " + channel.getChannelName() + " :" + newTopic + "\r\n"; 
+            channel.broadcast(broadcastMessage, cfd, true);
+            std::time_t now = std::time(nullptr);
+            channel.setEditer(sender.getNick());
+            channel.setTopicUpdated(now);
+        }
     }
-    else
-        std::cout << "sender doesnt exist?" << std::endl;
 }
 
 void    Server::topic(int cfd, std::string arg)
 {
-    std::string message;
-    message = arg.substr(6, arg.size() - 6);
+    std::string cmnd;
+    std::istringstream argument(arg);
+    argument >> cmnd;
     
     std::string recipient;
-    size_t split = message.find(':');
-    recipient = message.substr(0, split - 1);
+    argument >> recipient;
+    if (recipient.empty())
+    {
+        int clientIndex = getClientIndex(cfd);
+        if (clientIndex > -1) {
+            Client &sender = _clients.at(clientIndex);
+            std::string sendThis = ":ft_irc 461 " + sender.getNick() + " TOPIC :Not enough parameters\r\n";
+            send(cfd, sendThis.c_str(), sendThis.length(), 0);
+            return ;
+        }
+    }
+
     std::string newTopic;
-    newTopic = message.substr(split + 1, message.size() - split);
+    std::getline(argument, newTopic);
 
-    int channelIndex = getChannelIndex(recipient);
-
+    while (newTopic[0] == ':' || newTopic[0] == ' ')
+        newTopic.erase(0, 1);
+    std::cout << "This is the new Topic: " << newTopic << std::endl;
+    int channelIndex = getChannelIndex(recipient); 
     if (channelIndex > -1)
     {
         Channel &channel = _channels.at(channelIndex);
@@ -49,22 +75,20 @@ void    Server::topic(int cfd, std::string arg)
                 Client &sender = _clients.at(clientIndex);
                 std::string sendThis;
                 if (channel.containSender(cfd) == true)
-                    sendThis = ":482" + sender.getNick() + "!~" + sender.getUser() + "@" + sender.getIPa() + " TOPIC " + recipient + " :You're not a channel operator\r\n";
+                    sendThis = ":ft_irc 482 " + sender.getNick() + " " + channel.getChannelName() + " :You're not a channel operator\r\n";
                 else
-                    sendThis = ":442 " + sender.getNick() + "!~" + sender.getUser() + "@" + sender.getIPa() + " TOPIC " + recipient + " :You're not on that channel\r\n";
+                    sendThis = ":ft_irc 442 " + sender.getNick() + " " + channel.getChannelName() + " :You're not on that channel\r\n";
                 send(cfd, sendThis.c_str(), sendThis.length(), 0);
                 return ;
             }
         }
     }
     else {
-
         int clientIndex = getClientIndex(cfd);
-
         if (clientIndex > -1)
         {
             Client &sender = _clients.at(clientIndex);
-            std::string sendThis = ":401 " + sender.getNick() + " " + recipient + " :No such channel\r\n";
+            std::string sendThis = ":ft_irc 401 " + sender.getNick() + " " + recipient + " :No such channel\r\n";
             send(cfd, sendThis.c_str(), sendThis.length(), 0);
             return ;
         }

@@ -56,8 +56,8 @@ class Channel {
 		void				broadcast(const std::string& msg, int senderFd, bool excludeSender);
 
 		void				setEditer(std::string editor) {_editer = editor;}
-		std::string			getEditer() {return (_editer);}
+		std::string			getEditer() const {return _editer;}
 
 		void				setTopicUpdated(std::time_t update) {_topicUpdated = update;}
-		std::time_t			getTopicUpdated() {return (_topicUpdated);}
+		std::time_t			getTopicUpdated() const {return (_topicUpdated);}
 };
