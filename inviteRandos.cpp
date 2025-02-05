@@ -37,19 +37,18 @@ void Server::inviteRandos(int cfd, std::string arg){
     std::string targetNick = tokens[1];
     std::string channelName = tokens[2];
 
-
-    if (!channelExist(channelName)) {
-        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
-        send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete them
-        return ;
-    }
-
     int targetFd = getUserFdByNick(targetNick);
     if (targetFd == -1) {
         std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete this
+        return ;
+    }
+
+    if (!channelExist(channelName)) {
+        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
@@ -68,7 +67,7 @@ void Server::inviteRandos(int cfd, std::string arg){
     }
 
     if (!hasOpRights(cfd, channelName)) {
-        std::string errMsg = ":ft_irc 482 " + executorNick + " " + channelName + " :You're not channel operator\r\n";
+        std::string errMsg = ":ft_irc 482 " + executorNick + " " + channelName + " :You're not a channel operator\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
