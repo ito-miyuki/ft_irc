@@ -7,7 +7,6 @@ Client::Client(int fd, std::string ipAddress) : _password(""), _nickname(""), _u
 {}
 
 Client::~Client(){
-    // anytging to delete?
 }
 
 Client::Client(const Client& other) : _password(other.getPassword()), _nickname(other.getNick()), _username(other.getUser()), _ipA(other.getIPa()), _isRegistered(other.isRegistered()), _fd(other.getFd()), _jointChannels(other._jointChannels), _opChannels(other._opChannels)

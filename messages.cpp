@@ -1,9 +1,9 @@
 #include "Server.hpp"
 
-/*message from irssi has this format
+/*
+message from irssi has this format
 PRIVMSG <name or channel> :<the actual message we want to filter>
-Channel name can only be gotten by checking if the first character 
-is a hashtag or not*/
+*/
 
 void    Server::sendToClient(int cfd, std::string dm, std::string recipient)
 {
@@ -43,7 +43,6 @@ void    Server::sendToChannel(int cfd, std::string dm, std::string recipient)
             return ;
         }
     }
-    std::cerr << "How do you not exist?" << std::endl;
 }
 
 

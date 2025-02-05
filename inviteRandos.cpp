@@ -7,9 +7,6 @@
 */
 
 void Server::inviteRandos(int cfd, std::string arg){
-    // delete it
-    std::cout << "inviteRandos(): cfd is " << cfd << " and arg is " << arg << std::endl;
-
     std::istringstream iss(arg); // converts this string to stream
     std::vector<std::string> tokens;
     std::string token;
@@ -21,7 +18,6 @@ void Server::inviteRandos(int cfd, std::string arg){
 
     Client* executorClient = getClientObjByFd(cfd);
     if (!executorClient) {
-        //std::cerr << "executorClient '" << cfd << "' does not exist." << std::endl;
         return;
     }
 
@@ -30,7 +26,6 @@ void Server::inviteRandos(int cfd, std::string arg){
     if (tokens.size() < 3) {
         std::string errMsg = ":ft_irc 461 " + executorNick + " :INVITE :Not enough parameters\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging
         return ;
     }
 
@@ -41,7 +36,6 @@ void Server::inviteRandos(int cfd, std::string arg){
     if (!channelExist(channelName)) {
         std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
@@ -49,34 +43,29 @@ void Server::inviteRandos(int cfd, std::string arg){
     if (targetFd == -1) {
         std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete this
         return ;
     }
 
     if (!isUserInChannel(channelName, cfd)) {
         std::string errMsg = ":ft_irc 442 " + executorNick + " " + channelName + " :You're not on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
     if (isUserInChannel(channelName, targetFd)) {
         std::string errMsg = ":ft_irc 443 " + executorNick + " " + targetNick + " " + channelName + " :is already on channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
     if (!hasOpRights(cfd, channelName)) {
         std::string errMsg = ":ft_irc 482 " + executorNick + " " + channelName + " :You're not a channel operator\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
     Channel* channel = getChannelObj(channelName);
     if (!channel) {
-        std::cerr << "Channel '" << channelName << "' does not exist!" << std::endl;
         return;
     }
 

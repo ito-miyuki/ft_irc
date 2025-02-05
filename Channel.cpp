@@ -24,11 +24,8 @@ Channel	&Channel::operator=(const Channel &other)
 		_name = other.getChannelName();
 		_topic = other.getTopic();
 		_ops.assign(other._ops.begin(), other._ops.end());
-		//_ops = other._ops;
 		_clientLimit = other.getClientLimit();
-		//_jointClients = other._jointClients;
 		_jointClients.assign(other._jointClients.begin(), other._jointClients.end());
-		//_invitedClients = other._invitedClients;
 		_invitedClients.assign(other._invitedClients.begin(), other._invitedClients.end());
 		_inviteOnly = other.isInviteOnly();
 		_topicRestricted = other.isTopicRestricted();
@@ -55,7 +52,7 @@ void Channel::removeClient(int cfd) {
 void Channel::addToInvitedClients(int cfd) {
 	for (size_t i = 0; i < _invitedClients.size(); i++) {
 		if (_invitedClients[i] == cfd) {
-			std::cerr << "User are already in the invited list" << std::endl;
+			return ;
 		}
 	}
 	_invitedClients.push_back(cfd);

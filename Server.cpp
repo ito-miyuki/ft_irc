@@ -84,13 +84,8 @@ int Server::getUserFdbyNick(const std::string& nickName) {
 }
 
 bool Server::channelExist(const std::string& channelName) {
-    std::cout << "You are in channelExist()" << std::endl; // delete it 
-    std::cout << "Total channels in _channels: " << _channels.size() << std::endl; // delete it
-
     for (std::vector<Channel>::iterator ite = _channels.begin(); ite != _channels.end(); ++ite) {
-        std::cout << "channel name that I am looking at is: " << ite->getChannelName() << std::endl;
         if (ite->getChannelName() == channelName) {
-            std::cout << "Channel name exist" << std::endl; // do something
             return true;
         }
     }
@@ -124,6 +119,5 @@ bool Server::isUserInChannel(const std::string& channelName, int userFd) {
             return false;
         }
     }
-    std::cout << "The channel doesn't exist" << std::endl; // change the message
     return false;
 }

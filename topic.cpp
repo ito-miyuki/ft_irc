@@ -1,12 +1,5 @@
 #include "Server.hpp"
 
-//:sataskin!~sataskin@194.136.126.51 TOPIC #topictester :cat
-//what I get from irssi : TOPIC #channel :new topic
-// std::ctime(&now);
-//std::string response1 = ":ft_irc 332 " + sender.getNick() + " " + recipient + " :" + topic + "\r\n";
-//std::string response2 = ":ft_irc 333 " + sender.getNick() + " " + recipient + " " + topicSetter + " " + std::to_string(topicTimestamp) + "\r\n";
-
-
 void    Server::changeTopic(Channel &channel, int cfd, std::string newTopic)
 {
     int clientIndex = getClientIndex(cfd);
@@ -58,7 +51,6 @@ void    Server::topic(int cfd, std::string arg)
 
     while (newTopic[0] == ':' || newTopic[0] == ' ')
         newTopic.erase(0, 1);
-    std::cout << "This is the new Topic: " << newTopic << std::endl;
     int channelIndex = getChannelIndex(recipient); 
     if (channelIndex > -1)
     {

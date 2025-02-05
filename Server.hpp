@@ -6,31 +6,31 @@
 # include <sys/socket.h> // for socket() and send
 # include <netinet/in.h> // for sockaddr_in
 # include <unistd.h> // for close()
-#include <cstring> // for memset
-#include <fcntl.h>
-#include <arpa/inet.h> // for inet_ntoa()
-#include <sstream>
-#include <regex>
-#include <csignal>
-#include <algorithm>
-#include <ctime>
+# include <cstring> // for memset
+# include <fcntl.h>
+# include <arpa/inet.h> // for inet_ntoa()
+# include <sstream>
+# include <regex>
+# include <csignal>
+# include <algorithm>
+# include <ctime>
 
-#define MAX_CLIENTS 100
-#define MAX_CHANNELS 100
+# define MAX_CLIENTS 100
+# define MAX_CHANNELS 100
 
-#include "Client.hpp"
-#include "Channel.hpp"
+# include "Client.hpp"
+# include "Channel.hpp"
 
 class Channel;
 class Client;
 
 class Server {
     private:
-        int 					_port; // do we want to name like this instead? port_ 
+        int 					_port;
         std::string 			_password;
-        int 					_serverFd; // not in use yet
-        std::vector<Client>		_clients; // client's info
-        std::vector<Channel>	_channels; // channel info
+        int 					_serverFd;
+        std::vector<Client>		_clients;
+        std::vector<Channel>	_channels;
 		std::vector<pollfd>		_fds;
 		size_t					_clientAmount;
 		static bool				_signal; // static is accessable without instance
@@ -46,7 +46,6 @@ class Server {
 				NICK,
 				PING,
 				QUIT,
-				WHOIS,
 				FAIL
 		};
 
@@ -106,10 +105,10 @@ class Server {
 		bool    checkSender(int cfd, Client *client);
 
 		void	kickSomeone(int cfd, std::string arg);
-		bool	channelExist(const std::string& channelName); // should this be in Channel class?
-		bool	isUserInChannel(const std::string& channelName, int userFd); // should this be in other class?
-		int		getUserFdByNick(const std::string& nickName); // should this be in other class?
-		Channel* getChannelObj(const std::string& channelName); // temporary solution
+		bool	channelExist(const std::string& channelName);
+		bool	isUserInChannel(const std::string& channelName, int userFd);
+		int		getUserFdByNick(const std::string& nickName);
+		Channel* getChannelObj(const std::string& channelName); 
 
 		Client* getClientObjByFd(int fd);
 
@@ -124,10 +123,8 @@ class Server {
 		void	notifyChannels(int cfd, std::string msg);
 		void	removeDeadChannels();
 
-		//void	whois(int cfd, std::string arg);
-
     public:
-        Server(int port, std::string password); // should it be?: const std::string& password
+        Server(int port, std::string password);
         ~Server();
         Server(const Server& other);
         Server& operator=(const Server& other);
@@ -143,7 +140,7 @@ class Server {
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
 
-		static void setSignal(bool value); // is this a correct place to put?
+		static void setSignal(bool value);
 
 
 };

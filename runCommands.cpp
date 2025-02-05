@@ -50,11 +50,6 @@ Server::Command	Server::identifyCommand(std::string *cmd) {
 		command = QUIT;
 		found = (*cmd).find("QUIT");
 	}
-	/* else if ((*cmd).find("WHOIS") != std::string::npos)
-	{
-		command = WHOIS;
-		found = (*cmd).find("WHOIS");
-	} */
 	if (found != std::string::npos && found != 0)
 		*cmd = (*cmd).substr(found);
 	return (command);
@@ -85,10 +80,7 @@ void	Server::runCommand(int cfd, std::string arg, size_t *clientIndex)
 			return (pingMyPong(cfd, arg));
 		case 8:
 			return (quit(cfd, arg, clientIndex));
-		case 9:
-			//return (whois(cfd, arg));
 		default :
-			std::cout << "Unknown command" << std::endl;
-			// unknown command, also errors will go here....?
+			return ;
 	}
 }

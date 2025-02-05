@@ -37,7 +37,7 @@ void	Server::processInputData(std::stringstream &ss, int cfd, size_t *clientInde
 
 	while (getline(ss, arg))
 	{
-		std::cout <<  "this is our arg = <" << arg << ">" << std::endl;
+		//std::cout <<  "this is our arg = <" << arg << ">" << std::endl; // for eval
 		if (arg.empty())
 			continue ;
 		if (!arg.empty() && arg.back() == '\r')

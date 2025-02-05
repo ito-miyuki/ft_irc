@@ -17,8 +17,8 @@ class Channel {
 		bool				_inviteOnly; // for +i
 		bool				_topicRestricted; // for +t
 		std::string			_key; // channel password
-		std::time_t			_topicUpdated;
-		std::string			_editer;
+		std::time_t			_topicUpdated; // when topic was last updated
+		std::string			_editer; // who updated topic
 
     public:
         Channel();
