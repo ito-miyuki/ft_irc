@@ -2,36 +2,35 @@
 
 void	Server::setOpRights(int cfd, std::vector<std::string> &params) {
 
-	int	targetFd = getUserFdByNick(params.at(1));
-	Client	&target = _clients.at(getClientIndex(targetFd));
+	int	targetFd = getUserFdByNick(params.at(3));
+	Channel	&opChannel = _channels.at(getChannelIndex(params.at(1)));
 
-	std::string channelName = findChannel(_clients.at(getClientIndex(cfd)), target);
+	if (opChannel.containSender(targetFd)) {
 
-	if (!channelName.empty()) {
+		Client	&target = _clients.at(getClientIndex(targetFd));
 
-		Channel	&opChannel = _channels.at(getChannelIndex(channelName));
-		
 		if (params.at(2).front() == '-') {
 
-			opChannel.removeOp(target.getFd());
-			opChannel.addClient(target.getFd());
-			target.removeOpChannel(opChannel.getChannelName());
-			target.addChannel(opChannel.getChannelName());
+			opChannel.removeOp(targetFd);
+			opChannel.addClient(targetFd);
+			target.removeOpChannel(params.at(1));
+			target.addChannel(params.at(1));
 
-			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + target.getNick() + " " + params.at(2) + "\r\n";
+			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + opChannel.getChannelName() + " " + target.getNick() + " " + params.at(2) + "\r\n";
 			opChannel.broadcast(msg, cfd, true);
+
 		} else if (params.at(2).front() == '+') {
 
-			opChannel.removeClient(target.getFd());
-			opChannel.addOp(target.getFd());
-			target.removeChannel(opChannel.getChannelName());
-			target.addOpChannel(opChannel.getChannelName());
+			opChannel.removeClient(targetFd);
+			opChannel.addOp(targetFd);
+			target.removeChannel(params.at(1));
+			target.addOpChannel(params.at(1));
 
-			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + target.getNick() + " " + params.at(2) + "\r\n";
+			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " MODE " + opChannel.getChannelName() + " " + target.getNick() + " " + params.at(2) + "\r\n";
 			opChannel.broadcast(msg, cfd, true);
 		}
 		return ;
 	}
-	std::string	msg = ":ft_irc 441 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(1) + " :They aren't on that channel\r\n";
+	std::string	msg = ":ft_irc 441 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(1) + " " + params.at(3) + " :They aren't on that channel\r\n";
 	send(cfd, msg.c_str(), msg.length(), 0);
 }

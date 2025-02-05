@@ -7,7 +7,6 @@ bool	Server::isRegistered(int cfd) {
 		if (it->getFd() == cfd)
 			return (it->isRegistered());
 	}
-	std::cerr << "You have done the impossible (8" << std::endl; // REMOVE BEFORE SUBMITTING
 	return (false);
 }
 
@@ -15,7 +14,7 @@ void	Server::registerPassword(Client& client, std::string arg, size_t *clientInd
 
 	std::size_t	found = arg.find("PASS");
 
-	if (found != std::string::npos) {
+	if (found != std::string::npos && arg.length() > 5) {
 
 		std::string pwd = arg.substr(found + 5);
 		if (pwd == getPassword()) {
@@ -30,20 +29,6 @@ void	Server::registerPassword(Client& client, std::string arg, size_t *clientInd
 			eraseClient(client.getFd(), clientIndex);
 		}
 	}
-	/* if (arg.compare(0, 5, "PASS ") == 0) {
-		std::string pwd = arg.substr(5, std::string::npos);
-		if (pwd == getPassword()) {
-			std::string msg = "Password accepted.\n";
-			send(client.getFd(), msg.c_str(), msg.length(), 0);
-			client.setPassword(pwd);
-		} else	{
-			std::string msg = "ERROR: Incorrect password. Connection closed.\n"; // double checking needed
-			send(client.getFd(), msg.c_str(), msg.length(), 0);
-			close(client.getFd());
-			std::cerr << "Client provided an incorrect password. Connection terminated." << std::endl; // double checking needed
-			eraseClient(client.getFd(), clientIndex);
-		}
-	} */
 }
 
 bool	Server::isUniqueNick(std::string nick) {
@@ -56,12 +41,11 @@ bool	Server::isUniqueNick(std::string nick) {
 	return true;
 }
 
-// cannot have the same nickname as anyone else | misses capital letter check!!!
 void	Server::registerNickname(Client& client, std::string arg) {
 
 	std::size_t	found = arg.find("NICK");
 
-	if (found != std::string::npos) {
+	if (found != std::string::npos && arg.length() > 5) {
 
 		if (client.getPassword().empty()) {
 			
@@ -75,7 +59,7 @@ void	Server::registerNickname(Client& client, std::string arg) {
 		std::string newNick = nick;
 		std::regex	incorrect("^([#$:#&+%~,]\\S*|\\S*[,*.?!@ ]\\S*|\\+(q|a|o|h|v)\\S*)");
 
-		if (std::regex_match(newNick, incorrect)) {
+		if (std::regex_match(newNick, incorrect) || newNick.find(' ') != std::string::npos) {
 
 			std::cerr << "ERROR: Erroneus nickname" << std::endl;
 			return ;
@@ -88,27 +72,13 @@ void	Server::registerNickname(Client& client, std::string arg) {
 		client.setNickname(newNick);
 		std::cout << "User's nickname: " << client.getNick() << std::endl;
 	}
-	/* if (arg.compare(0, 5, "NICK ") == 0) {
-		std::string nick = arg.substr(5, std::string::npos);
-		int	nickCount = 1;
-
-		std::string newNick = nick;
-		while (!isUniqueNick(newNick))
-		{
-			newNick = nick + std::to_string(nickCount);
-			nickCount++;
-		}
-		client.setNickname(newNick);
-		std::cout << "User's nickname: " << client.getNick() << std::endl;
-	} */
 }
 
-// can have the same username as someone else
 void	Server::registerUser(Client& client, std::string arg) {
 
 	std::size_t	found = arg.find("USER");
 
-	if (found != std::string::npos) {
+	if (found != std::string::npos && arg.length() > 5) {
 
 		if (client.getPassword().empty()) {
 
@@ -135,17 +105,6 @@ void	Server::registerUser(Client& client, std::string arg) {
 		} else 
 			std::cerr << "ERROR: Failed to find username" << std::endl;
 	}
-	/* if (arg.compare(0, 5, "USER ") == 0) {
-		std::string user = arg.substr(5, std::string::npos);
-		size_t divider = user.find(' ');
-		if (divider != std::string::npos)
-		{
-			client.setUsername(user.substr(0, divider));
-			std::cout << "User's username: " << client.getUser() << std::endl;
-		}
-		else
-			std::cerr << "Failed to find username" << std::endl;
-	} */
 }
 
 void	Server::authenticate(Client &client, std::string arg, size_t *clientIndex) {

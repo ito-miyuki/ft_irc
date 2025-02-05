@@ -94,6 +94,7 @@ class Server {
 		void	setOpRights(int cfd, std::vector<std::string> &params);
 		bool	isClient(std::string nick);
 		bool	getClient(std::string name, Client *client);
+		void	returnChannelMode(int cfd, Channel &channel);
 		std::string	findChannel(Client &op, Client &newOp);
 		std::string	findCommonChannel(int cfd, std::string targetNick);
 

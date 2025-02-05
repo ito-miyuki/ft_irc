@@ -10,9 +10,8 @@ bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 		{
 			std::string msg = ":ft_irc 403 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(1) + " :No such channel\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
-			return (false);
 		}
-		return (true);
+		return (false);
 	}
 	if (params.size() > 2 && params.at(2) != "+i" && params.at(2) != "-i" && params.at(2) != "+t" && params.at(2) != "-t"
 		&& params.at(2) != "+k" && params.at(2) != "-k" && params.at(2) != "+o" && params.at(2) != "-o"
@@ -21,47 +20,73 @@ bool	Server::verifyParams(int cfd, std::vector<std::string> &params)
 	return (true);
 }
 
+void	Server::returnChannelMode(int cfd, Channel &channel) {
+
+	std::string msg = ":ft_irc 324 " + _clients.at(getClientIndex(cfd)).getNick() + " " + channel.getChannelName() + " ";
+				
+	if (channel.getClientLimit() > -1)
+		msg = msg + "l";
+	if (channel.isInviteOnly())
+		msg = msg + "i";
+	if (channel.isTopicRestricted())
+		msg = msg + "t";
+	if (!channel.getKey().empty())
+		msg = msg + "k";
+	msg = msg + "\r\n";
+	send(cfd, msg.c_str(), msg.length(), 0);
+}
+
+
+// MODE #channel flag user/key/value(optional)
 void	Server::setMode(int cfd, std::vector<std::string> &params) {
 
 	if (verifyParams(cfd, params)) {
 
+		Channel &channel = _channels.at(getChannelIndex(params.at(1)));
+
 		if (hasOpRights(cfd, params.at(1))) {
 
-			if (params.size() > 2 && !params.at(2).empty()) {
+			if (params.size() == 2) {
 
-				int	chIndex = getChannelIndex(params.at(1));
-				if (params.at(2).back() == 'o' && chIndex < 0)
-					setOpRights(cfd, params);
+				returnChannelMode(cfd, channel);
+
+			} else if (params.size() == 3) {
+
+				if (params.at(2).back() == 'i')
+					setInviteStatus(cfd, channel, params.at(2));
+				else if (params.at(2).back() == 't')
+					setTopicRestriction(cfd, channel, params.at(2));
+				else if (params.at(2) == "-l")
+					setClientLimit(cfd, channel, params);
 				else {
 
-					Channel &channel = _channels.at(chIndex);
+					std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Not enough parameters\r\n";
+					send(cfd, msg.c_str(), msg.length(), 0);
+				}
 
-					if (params.at(2).back() == 'i' && params.size() < 4)
-						setInviteStatus(cfd, channel, params.at(2));
-					else if (params.at(2).back() == 't' && params.size() < 4)
-						setTopicRestriction(cfd, channel, params.at(2));
-					else if (params.at(2).back() == 'k')
-						setKey(cfd, channel, params);
-					else if (params.at(2).back() == 'l')
-						setClientLimit(cfd, channel, params);
+			} else if (params.size() == 4) {
+
+				if (params.at(2).back() == 'o')
+					setOpRights(cfd, params);
+				else if (params.at(2).back() == 'k')
+					setKey(cfd, channel, params);
+				else if (params.at(2) == "+l")
+					setClientLimit(cfd, channel, params);
+				else {
+
+					std::string msg = ":ft_irc 461 " + _clients.at(getClientIndex(cfd)).getUser() + " MODE :Incorrect number of parameters\r\n";
+					send(cfd, msg.c_str(), msg.length(), 0);
 				}
 			}
+
+		} else if (params.size() == 2 && channel.containSender(cfd)) {
+
+			returnChannelMode(cfd, channel);
 
 		} else {
 
-			if (params.size() > 2) {
-
-				if (params.at(1) == _clients.at(getClientIndex(cfd)).getNick() && params.at(2).back() == 'o') {
-
-					std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + findCommonChannel(cfd, params.at(1)) + " :You're not channel operator\r\n";
-					send(cfd, msg.c_str(), msg.length(), 0);
-				}
-				else if (params.at(1) != _clients.at(getClientIndex(cfd)).getNick()) {
-
-					std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(1) + " :You're not channel operator\r\n";
-					send(cfd, msg.c_str(), msg.length(), 0);
-				}
-			}
+			std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(1) + " :You're not channel operator\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
 		}
 	}
 }
@@ -80,6 +105,7 @@ void	Server::mode(int cfd, std::string arg) {
 			return ;
 		}
 		setMode(cfd, params);
+
 	} else {
 		
 		std::string msg = ":ft_irc 421 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(0) + " :Unknown command\r\n";
