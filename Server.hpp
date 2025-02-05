@@ -81,6 +81,7 @@ class Server {
 		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
 		bool	isValidName(std::string channel);
+		bool	isValidKey(std::string channelKey);
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);

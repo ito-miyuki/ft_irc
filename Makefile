@@ -32,7 +32,6 @@ SOURCES := main.cpp\
 			mode/setTopicRestriction.cpp\
 			mode/setKey.cpp\
 			quit.cpp\
-			whois.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

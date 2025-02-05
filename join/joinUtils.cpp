@@ -63,3 +63,12 @@ bool	Server::isValidName(std::string channel) {
 		return (true);
 	return (false);
 }
+
+bool	Server::isValidKey(std::string channelKey) {
+	
+	std::regex	correct("^[a-zA-Z0-9]+$");
+
+	if (std::regex_match(channelKey, correct))
+		return (true);
+	return (false);
+}
