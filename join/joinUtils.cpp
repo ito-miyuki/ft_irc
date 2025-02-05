@@ -57,9 +57,18 @@ bool	Server::checkLimit(int cfd, Channel &channel)
 
 bool	Server::isValidName(std::string channel) {
 
-	std::regex	correct("^[&#][^\\s,^\x07]+$");
+	std::regex	correct("^[#][^\\s,^\x07]+$");
 
 	if (std::regex_match(channel, correct))
+		return (true);
+	return (false);
+}
+
+bool	Server::isValidKey(std::string channelKey) {
+	
+	std::regex	correct("^[a-zA-Z0-9]+$");
+
+	if (std::regex_match(channelKey, correct))
 		return (true);
 	return (false);
 }

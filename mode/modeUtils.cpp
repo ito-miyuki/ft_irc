@@ -24,8 +24,8 @@ bool    Server::getClient(std::string name, Client *client)
     return (false);
 }
 
-std::string	Server::findChannel(Client &op, Client &newOp)
-{
+std::string	Server::findChannel(Client &op, Client &newOp) {
+
 	std::vector<std::string>	result;
 	std::vector<std::string>	opChannels = op.getOpChannels();
 	std::vector<std::string>	jointChannels = newOp.getJointChannels();
@@ -41,24 +41,12 @@ std::string	Server::findChannel(Client &op, Client &newOp)
 
 bool	Server::hasOpRights(int cfd, std::string channelName){
 
-	int	chIndex = getChannelIndex(channelName);
+	int							chIndex = getChannelIndex(channelName);
+	std::vector<int>			&ops = _channels.at(chIndex).getOps();
+	std::vector<int>::iterator	result = std::find(ops.begin(), ops.end(), cfd);
 
-	if (chIndex > -1){
-
-		std::vector<int>	ops = _channels.at(chIndex).getOps();
-		std::vector<int>::iterator result = std::find(ops.begin(), ops.end(), cfd);
-		if (result != ops.end())
-			return (true);
-	}
-	else if (isClient(channelName))
-	{
-		Client	target;
-
-		getClient(channelName, &target);
-		std::string	commonChannel = findChannel(_clients.at(getClientIndex(cfd)), target);
-		if (!commonChannel.empty())
-			return (true);
-	}
+	if (result != ops.end())
+		return (true);
 	return (false);
 }
 

@@ -14,7 +14,7 @@ void	Server::registerPassword(Client& client, std::string arg, size_t *clientInd
 
 	std::size_t	found = arg.find("PASS");
 
-	if (found != std::string::npos) {
+	if (found != std::string::npos && arg.length() > 5) {
 
 		std::string pwd = arg.substr(found + 5);
 		if (pwd == getPassword()) {
@@ -41,12 +41,11 @@ bool	Server::isUniqueNick(std::string nick) {
 	return true;
 }
 
-// cannot have the same nickname as anyone else | misses capital letter check!!!
 void	Server::registerNickname(Client& client, std::string arg) {
 
 	std::size_t	found = arg.find("NICK");
 
-	if (found != std::string::npos) {
+	if (found != std::string::npos && arg.length() > 5) {
 
 		if (client.getPassword().empty()) {
 			
@@ -72,12 +71,11 @@ void	Server::registerNickname(Client& client, std::string arg) {
 	}
 }
 
-// can have the same username as someone else
 void	Server::registerUser(Client& client, std::string arg) {
 
 	std::size_t	found = arg.find("USER");
 
-	if (found != std::string::npos) {
+	if (found != std::string::npos && arg.length() > 5) {
 
 		if (client.getPassword().empty()) {
 

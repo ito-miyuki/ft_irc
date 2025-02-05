@@ -64,6 +64,8 @@ void    Server::messages(int cfd, std::string arg) {
         }
         std::string dm;
         std::getline(input, dm);
+		while (dm[0] == ' ')
+			dm.erase(0, 1);
         if (dm[0] == ':')
             dm.erase(0, 1);
         if (dm.empty()) {

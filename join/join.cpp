@@ -41,8 +41,17 @@ void	Server::addNewChannel(int cfd, std::string channelName, std::string channel
 	std::string	key = "";
 	Client	&client = _clients.at(getClientIndex(cfd));
 
-	if (!channelKey.empty())
-		key = channelKey;
+	if (!channelKey.empty()) {
+
+		if (isValidKey(channelKey))
+			key = channelKey;
+		else {
+
+			std::string msg = ":ft_irc 525 " + client.getUser() + " " + channelName + " :Key is not well-formed\r\n";
+			send(cfd, msg.c_str(), msg.length(), 0);
+			return ;
+		}
+	}
 	Channel newChannel(channelName, cfd, key);
 	addChannel(newChannel);
 	client.addOpChannel(channelName);

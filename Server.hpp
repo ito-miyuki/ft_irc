@@ -81,6 +81,7 @@ class Server {
 		bool	checkLimit(int cfd, Channel &channel);
 		void	welcomeClient(int cfd, Channel &channel, Client &client);
 		bool	isValidName(std::string channel);
+		bool	isValidKey(std::string channelKey);
 
 		void	mode(int cfd, std::string arg);
 		void	setMode(int cfd, std::vector<std::string> &params);
@@ -92,6 +93,7 @@ class Server {
 		void	setOpRights(int cfd, std::vector<std::string> &params);
 		bool	isClient(std::string nick);
 		bool	getClient(std::string name, Client *client);
+		void	returnChannelMode(int cfd, Channel &channel);
 		std::string	findChannel(Client &op, Client &newOp);
 		std::string	findCommonChannel(int cfd, std::string targetNick);
 

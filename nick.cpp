@@ -45,6 +45,7 @@ void	Server::nick(int cfd, std::string arg)
 			std::string msg = ":ft_irc 431 " + _clients.at(getClientIndex(cfd)).getNick() + " :No nickname given\r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 			return ;
+			
 		} else if (_clients.at(getClientIndex(cfd)).getNick().compare(params.at(1)) == 0) {
 		} else {
 			verifyNick(cfd, params.at(1));
