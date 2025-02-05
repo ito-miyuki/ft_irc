@@ -49,10 +49,18 @@ void	Server::setMode(int cfd, std::vector<std::string> &params) {
 
 		} else {
 
-			if (params.at(1) != _clients.at(getClientIndex(cfd)).getNick() && params.size() > 2) {
+			if (params.size() > 2) {
 
-				std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + findCommonChannel(cfd, params.at(1)) + " :You're not channel operator\r\n";
-				send(cfd, msg.c_str(), msg.length(), 0);
+				if (params.at(1) == _clients.at(getClientIndex(cfd)).getNick() && params.at(2).back() == 'o') {
+
+					std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + findCommonChannel(cfd, params.at(1)) + " :You're not channel operator\r\n";
+					send(cfd, msg.c_str(), msg.length(), 0);
+				}
+				else if (params.at(1) != _clients.at(getClientIndex(cfd)).getNick()) {
+
+					std::string	msg = ":ft_irc 482 " + _clients.at(getClientIndex(cfd)).getUser() + " " + params.at(1) + " :You're not channel operator\r\n";
+					send(cfd, msg.c_str(), msg.length(), 0);
+				}
 			}
 		}
 	}
@@ -78,5 +86,3 @@ void	Server::mode(int cfd, std::string arg) {
 		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 }
-
-//findCommonChannel(cfd, params.at(1))
