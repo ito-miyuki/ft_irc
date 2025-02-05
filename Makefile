@@ -22,6 +22,7 @@ SOURCES := main.cpp\
 			join/joinUtils.cpp\
 			messages.cpp\
 			channel_helpers.cpp\
+			topic.cpp\
 			kickSomeone.cpp\
 			inviteRandos.cpp\
 			mode/mode.cpp\

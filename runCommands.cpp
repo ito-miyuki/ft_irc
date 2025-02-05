@@ -72,7 +72,7 @@ void	Server::runCommand(int cfd, std::string arg, size_t *clientIndex)
 		case 1:
 			return inviteRandos(cfd, arg);
 		case 2:
-			//setTopic();
+			return (topic(cfd, arg));
 		case 3:
 			return (mode(cfd, arg));
 		case 4:
