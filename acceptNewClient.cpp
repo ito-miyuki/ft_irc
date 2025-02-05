@@ -33,7 +33,7 @@ void	Server::acceptNewClient()
 
 	addClient(newClient);
 	_fds.push_back(clientFd);
-	incrementClientAmount();
+	_clientAmount++;
 }
 
 
