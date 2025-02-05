@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(true), _key("")
+Channel::Channel() : _name(""), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(true), _key(""), _topicUpdated(0), _editer("")
 {}
 
 Channel::Channel(std::string name, int op, std::string key) : _name(name), _topic(""), _clientLimit(-1), _inviteOnly(false), _topicRestricted(true), _key(key)
@@ -8,11 +8,13 @@ Channel::Channel(std::string name, int op, std::string key) : _name(name), _topi
 	_ops.push_back(op);
 }
 
-Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _clientLimit(other.getClientLimit()), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey())
+Channel::Channel(const Channel &other) : _name(other.getChannelName()), _topic(other.getTopic()), _clientLimit(other.getClientLimit()), _inviteOnly(other.isInviteOnly()), _topicRestricted(other.isTopicRestricted()), _key(other.getKey()) 
 {
 	_ops.assign(other._ops.begin(), other._ops.end());
 	_jointClients.assign(other._jointClients.begin(), other._jointClients.end());
 	_invitedClients.assign(other._invitedClients.begin(), other._invitedClients.end());
+	_editer = other.getEditer();
+	_topicUpdated = other.getTopicUpdated();
 }
 
 Channel	&Channel::operator=(const Channel &other)
@@ -31,6 +33,8 @@ Channel	&Channel::operator=(const Channel &other)
 		_inviteOnly = other.isInviteOnly();
 		_topicRestricted = other.isTopicRestricted();
 		_key = other.getKey();
+		_editer = other.getEditer();
+		_topicUpdated = other.getTopicUpdated();
 	}
 	return (*this);
 }

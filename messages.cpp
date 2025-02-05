@@ -48,17 +48,34 @@ void    Server::sendToChannel(int cfd, std::string dm, std::string recipient)
 
 
 void    Server::messages(int cfd, std::string arg) {    
-    std::string message;
-    message = arg.substr(8, arg.size() - 8);
+    int clientIndex = getClientIndex(cfd);
+    if (clientIndex > -1)
+    {
+        Client &sender = _clients.at(clientIndex);
+        std::istringstream input(arg);
+        std::string cmnd; 
+        input >> cmnd;
+
+        std::string recipient;
+        input >> recipient;
+        if (recipient.empty()) {
+            std::string sendThis = ":ft_irc 411 " + sender.getNick() + " :No recipient given\r\n";
+            send(cfd, sendThis.c_str(), sendThis.length(), 0);
+            return ;
+        }
+        std::string dm;
+        std::getline(input, dm);
+        if (dm[0] == ':')
+            dm.erase(0, 1);
+        if (dm.empty()) {
+            std::string sendThis = ":ft_irc 412 " + sender.getNick() + " :No text to send\r\n";
+            send(cfd, sendThis.c_str(), sendThis.length(), 0);
+            return ;  
+        }
     
-    std::string recipient;
-    size_t split = message.find(':');
-    recipient = message.substr(0, split - 1);
-    std::string dm;
-    dm = message.substr(split + 1, message.size() - split);
-    
-    if (recipient[0] != '#')
-        sendToClient(cfd, dm, recipient);
-    else
-        sendToChannel(cfd, dm, recipient);
+        if (recipient[0] != '#')
+            sendToClient(cfd, dm, recipient);
+        else
+            sendToChannel(cfd, dm, recipient);
+    }
 }
