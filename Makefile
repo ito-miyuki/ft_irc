@@ -22,6 +22,7 @@ SOURCES := main.cpp\
 			join/joinUtils.cpp\
 			messages.cpp\
 			channel_helpers.cpp\
+			topic.cpp\
 			kickSomeone.cpp\
 			inviteRandos.cpp\
 			mode/mode.cpp\
@@ -31,8 +32,7 @@ SOURCES := main.cpp\
 			mode/setInviteStatus.cpp\
 			mode/setTopicRestriction.cpp\
 			mode/setKey.cpp\
-			quit.cpp\
-			whois.cpp
+			quit.cpp
 
 OBJECTS := $(SOURCES:.cpp=.o)
 

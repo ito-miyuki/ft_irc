@@ -1,11 +1,11 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <iostream>
-#include <poll.h> // for pol()
-#include <sys/socket.h> // for socket() and send
-#include <netinet/in.h> // for sockaddr_in
-#include <unistd.h> // for close()
+# include <string>
+# include <vector>
+# include <iostream>
+# include <poll.h> // for pol()
+# include <sys/socket.h> // for socket() and send
+# include <netinet/in.h> // for sockaddr_in
+# include <unistd.h> // for close()
 #include <cstring> // for memset
 #include <fcntl.h>
 #include <arpa/inet.h> // for inet_ntoa()
@@ -13,6 +13,7 @@
 #include <regex>
 #include <csignal>
 #include <algorithm>
+#include <ctime>
 
 #define MAX_CLIENTS 100
 #define MAX_CHANNELS 100
@@ -117,11 +118,13 @@ class Server {
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
 
+		void    topic(int cfd, std::string arg);
+		void    changeTopic(Channel &channel, int cfd, std::string newTopic);
 		void	quit(int cfd, std::string arg, size_t *clientIndex);
 		void	notifyChannels(int cfd, std::string msg);
 		void	removeDeadChannels();
 
-		void	whois(int cfd, std::string arg);
+		//void	whois(int cfd, std::string arg);
 
     public:
         Server(int port, std::string password); // should it be?: const std::string& password
