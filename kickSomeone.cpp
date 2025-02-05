@@ -97,6 +97,6 @@ void Server::kickSomeone(int cfd, std::string arg) {
     + " :" + (reason.empty() ? targetNick : reason) + "\r\n";
 
     send(targetFd, kickAnnounce.c_str(), kickAnnounce.length(), 0);
-    channel->broadcast(kickAnnounce, cfd, false);
+    channel->broadcast(kickAnnounce, cfd, true);
 }
     
