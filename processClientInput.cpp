@@ -53,6 +53,8 @@ void	Server::processInputData(std::stringstream &ss, int cfd, size_t *clientInde
 	}
 }
 
+
+
 void	Server::processClientInput(size_t *clientIndex, int cfd)
 {
 	char buffer[1024] = {0};
@@ -65,7 +67,26 @@ void	Server::processClientInput(size_t *clientIndex, int cfd)
 		eraseClient(cfd, clientIndex);
 		return ;
 	}
-	
-	std::stringstream	ss(buffer);
-	processInputData(ss, cfd, clientIndex);
+
+	buffer[byteRead] = '\0';
+	_clientBuffers[cfd] += buffer;
+
+	if (_clientBuffers[cfd].back() != '\n') {
+        return;
+    }
+
+	size_t pos;
+	while ((pos = _clientBuffers[cfd].find("\n")) != std::string::npos) {
+		
+		std::string command = _clientBuffers[cfd].substr(0, pos);
+
+		if (!command.empty() && command.back() == '\r') {
+			command.pop_back();
+		}
+
+		_clientBuffers[cfd].erase(0, pos + 1);
+
+		std::stringstream	ss(command);
+		processInputData(ss, cfd, clientIndex);
+	}
 }

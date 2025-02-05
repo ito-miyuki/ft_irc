@@ -15,10 +15,6 @@ void Server::kickSomeone(int cfd, std::string arg) {
         tokens.push_back(token);
     }
 
-    std::string targetNick = tokens[2];
-    std::string channelName = tokens[1];
-    std::string reason;
-
     Client* executorClient = getClientObjByFd(cfd);
     if (!executorClient) {
         std::cerr << "executorClient '" << cfd << "' does not exist." << std::endl;
@@ -28,11 +24,15 @@ void Server::kickSomeone(int cfd, std::string arg) {
     std::string executorNick = executorClient->getNick();
 
     if (tokens.size() < 3) {
-        std::string errMsg = ":server 461 " + executorNick + " " + channelName + " :KICK :Not enough parametersl\r\n";
+        std::string errMsg = ":ft_irc 461 " + executorNick + " :KICK :Not enough parameters\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging
         return ;
     }
+
+    std::string targetNick = tokens[2];
+    std::string channelName = tokens[1];
+    std::string reason;
 
     bool foundColon = false;
     for (size_t i = 3; i < tokens.size(); i++) {
@@ -56,30 +56,30 @@ void Server::kickSomeone(int cfd, std::string arg) {
     std::cout << "targetNick is: " << targetNick << std::endl;
     std::cout << "reason is: " << reason << std::endl;
 
-    if (!channelExist(channelName)) {
-        std::string errMsg = ":server 403 " + targetNick + " " + channelName + " :No such channel\r\n";
-        send(cfd, errMsg.c_str(), errMsg.length(), 0);
-        std::cout << errMsg << std::endl; // for debugging, delete them
-        return ;
-    }
-
     int targetFd = getUserFdByNick(targetNick);
     if (targetFd == -1) {
-        std::string errMsg = ":server 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
+        std::string errMsg = ":ft_irc 401 " + executorNick + " " + targetNick + " :No such nick/channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete this
         return ;
     }
 
+    if (!channelExist(channelName)) {
+        std::string errMsg = ":ft_irc 403 " + executorNick + " " + channelName + " :No such channel\r\n";
+        send(cfd, errMsg.c_str(), errMsg.length(), 0);
+        std::cout << errMsg << std::endl; // for debugging, delete them
+        return ;
+    }
+
     if (!isUserInChannel(channelName, targetFd)) {
-        std::string errMsg = ":server 441 " + targetNick + " " + channelName + " :They aren't on that channel\r\n";
+        std::string errMsg = ":ft_irc 441 " + targetNick + " " + channelName + " :They aren't on that channel\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
     }
 
     if (!hasOpRights(cfd, channelName)) {
-        std::string errMsg = ":server 482 " + executorNick + " " + channelName + " :You're not channel operator\r\n";
+        std::string errMsg = ":ft_irc 482 " + executorNick + " " + channelName + " :You're not a channel operator\r\n";
         send(cfd, errMsg.c_str(), errMsg.length(), 0);
         std::cout << errMsg << std::endl; // for debugging, delete them
         return ;
@@ -103,7 +103,7 @@ void Server::kickSomeone(int cfd, std::string arg) {
 
     std::string kickAnnounce = ":" + executorNick + "!~" + executorClient->getUser() + "@" + executorClient->getIPa() 
     + " KICK " + channel->getChannelName() + " " + targetClient->getNick() 
-    + " :" + (reason.empty() ? "" : reason) + "\r\n";
+    + " :" + (reason.empty() ? targetNick : reason) + "\r\n";
 
     send(targetFd, kickAnnounce.c_str(), kickAnnounce.length(), 0);
     channel->broadcast(kickAnnounce, cfd, false); // true or false, think about it again
