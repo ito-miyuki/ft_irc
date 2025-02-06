@@ -1,40 +1,36 @@
 #include "Server.hpp"
 
-void	Server::verifyNick(int cfd, std::string newNick)
-{
+void	Server::verifyNick(int cfd, std::string newNick) {
+
 	std::regex	incorrect("^([#$:#&+%~,]\\S*|\\S*[,*.?!@ ]\\S*|\\+(q|a|o|h|v)\\S*)");
 
-	if (std::regex_match(newNick, incorrect))
-	{
+	if (std::regex_match(newNick, incorrect)) {
+
 		std::string msg = ":ft_irc 432 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " :Erroneus nickname\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
-	}
-	else
-	{
-		if (isUniqueNick(newNick))
-		{
+	} else {
+
+		if (isUniqueNick(newNick)) {
+
 			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " NICK " + newNick + "\r\n";
-			bool	messageSent = false;
+
 			for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); std::advance(it, 1)) {
 				if ((*it).containSender(cfd)) {
-					(*it).broadcast(msg, cfd, true);
-					messageSent = true;
+					(*it).broadcast(msg, cfd, false);
 				}
 			}
-			if (messageSent == false)
-				send(cfd, msg.c_str(), msg.length(), 0);
+			send(cfd, msg.c_str(), msg.length(), 0);
 			_clients.at(getClientIndex(cfd)).setNickname(newNick);
-		}
-		else
-		{
+		} else {
+
 			std::string msg = ":ft_irc 433 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " \r\n";
 			send(cfd, msg.c_str(), msg.length(), 0);
 		}
 	}
 }
 
-void	Server::nick(int cfd, std::string arg)
-{
+void	Server::nick(int cfd, std::string arg) {
+	
 	std::vector<std::string>	params;
 
 	parser(arg, params, ' ');
