@@ -18,22 +18,21 @@ void	Server::acceptNewClient()
 		return ;
 	}
 
-	std::cout << "New client connected: " << clientSocket << std::endl;
-
 	clientFd.fd = clientSocket; // Add the new client socket
 	clientFd.events = POLLIN; // Monitor for incoming data from this client
 	clientFd.revents = 0;
 
-	if (getClientAmount() == MAX_CLIENTS) {
+	if (_clients.size() == MAX_CLIENTS) {
 		std::cerr << "Client amount exceeded" << std::endl;
 		return ;
 	}
+
+	std::cout << "New client connected: " << clientSocket << std::endl;
 	
 	Client	newClient(clientSocket, inet_ntoa((address.sin_addr)));
 
 	addClient(newClient);
 	_fds.push_back(clientFd);
-	_clientAmount++;
 }
 
 

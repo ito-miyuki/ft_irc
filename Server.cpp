@@ -1,8 +1,8 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password): _port(port), _password(password), _clientAmount(0) {}
+Server::Server(int port, std::string password): _port(port), _password(password) {}
 
-Server::Server(const Server& other) : _port(other.getPort()), _password(other.getPassword()), _serverFd(other.getServerFd()), _clients(other._clients), _channels(other._channels), _fds(other._fds), _clientAmount(other.getClientAmount())
+Server::Server(const Server& other) : _port(other.getPort()), _password(other.getPassword()), _serverFd(other.getServerFd()), _clients(other._clients), _channels(other._channels), _fds(other._fds)
 {}
 
 Server& Server::operator=(const Server& other){
@@ -13,7 +13,6 @@ Server& Server::operator=(const Server& other){
 		_clients.assign(other._clients.begin(), other._clients.end());
 		_channels.assign(other._channels.begin(), other._channels.end());
 		_fds.assign(other._fds.begin(), other._fds.end());
-		_clientAmount = other.getClientAmount();
     }
     return (*this);
 }

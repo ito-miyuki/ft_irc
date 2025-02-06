@@ -15,8 +15,7 @@
 # include <algorithm>
 # include <ctime>
 
-# define MAX_CLIENTS 100
-# define MAX_CHANNELS 100
+# define MAX_CLIENTS 20
 
 # include "Client.hpp"
 # include "Channel.hpp"
@@ -32,7 +31,6 @@ class Server {
         std::vector<Client>		_clients;
         std::vector<Channel>	_channels;
 		std::vector<pollfd>		_fds;
-		size_t					_clientAmount;
 		static bool				_signal; // static is accessable without instance
 		std::map<int, std::string> _clientBuffers;
 
@@ -137,7 +135,6 @@ class Server {
         std::string	getPassword() const {return _password;}
         int			getPort() const {return _port;}
         int			getServerFd() const {return _serverFd;}
-        size_t 		getClientAmount() const {return _clientAmount;}
 
 		void		addClient(const Client &client) {_clients.push_back(client);}
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}

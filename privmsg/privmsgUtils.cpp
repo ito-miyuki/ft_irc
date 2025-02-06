@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../Server.hpp"
 
 bool    Server::checkClient(std::string name, Client *client)
 {

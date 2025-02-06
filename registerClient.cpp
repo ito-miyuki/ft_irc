@@ -118,7 +118,6 @@ void	Server::authenticate(Client &client, std::string arg, size_t *clientIndex) 
 		msg = ":ft_irc 005 " + client.getNick() + " INVITE/MODE/JOIN/KICK/TOPIC/MSG/NICK/QUIT :are supported by this server\r\n";
 		send(client.getFd(), msg.c_str(), msg.length(), 0);
 		client.setAsRegistered();
-		_clientAmount++;
 	}
 }
 

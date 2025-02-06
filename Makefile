@@ -20,8 +20,8 @@ SOURCES := main.cpp\
 			nick.cpp\
 			join/join.cpp\
 			join/joinUtils.cpp\
-			messages.cpp\
-			channel_helpers.cpp\
+			privmsg/privmsg.cpp\
+			privmsg/privmsgUtils.cpp\
 			topic.cpp\
 			kickSomeone.cpp\
 			inviteRandos.cpp\

@@ -49,8 +49,13 @@ void    Server::topic(int cfd, std::string arg)
     std::string newTopic;
     std::getline(argument, newTopic);
 
-    while (newTopic[0] == ':' || newTopic[0] == ' ')
+    while (newTopic[0] == ' ') {
         newTopic.erase(0, 1);
+	}
+
+	if (newTopic[0] == ':')
+		newTopic.erase(0, 1);
+	
     int channelIndex = getChannelIndex(recipient); 
     if (channelIndex > -1)
     {
