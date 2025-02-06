@@ -6,7 +6,7 @@ void	Server::welcomeClient(int cfd, Channel &channel, Client &client)
 	send(cfd, msg.c_str(), msg.length(), 0);
 	if (!channel.getTopic().empty())
 	{
-		msg = ":ft_irc 332 " + client.getNick() + " @ " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
+		msg = ":ft_irc 332 " + client.getNick() + " " + channel.getChannelName() + " :" + channel.getTopic() + "\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 	}
 	msg = ":ft_irc 353 " + client.getNick() + " @ " + channel.getChannelName() + " :";

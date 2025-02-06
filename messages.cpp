@@ -12,7 +12,7 @@ void    Server::sendToClient(int cfd, std::string dm, std::string recipient)
     std::string sendThis;
     
     if (checkClient(recipient, &reci) && checkSender(cfd, &sender)) {
-        sendThis = ":" + sender.getNick() + " PRIVMSG " + reci.getNick() + " :" + dm + "\r\n"; 
+        sendThis = ":" + sender.getNick() + "!~" +  sender.getUser() + "@" + sender.getIPa() + " PRIVMSG " + reci.getNick() + " :" + dm + "\r\n"; 
         send(reci.getFd(), sendThis.c_str(), sendThis.length(), 0);
     } else {
         sendThis = ":ft_irc 401 " + sender.getNick() + "!~" + sender.getUser() + sender.getIPa() + " " + recipient + " :No such nick/channel\r\n";
