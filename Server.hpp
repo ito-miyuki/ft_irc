@@ -14,6 +14,7 @@
 # include <csignal>
 # include <algorithm>
 # include <ctime>
+# include <map>
 
 # define MAX_CLIENTS 20
 
@@ -25,14 +26,14 @@ class Client;
 
 class Server {
     private:
-        int 					_port;
-        std::string 			_password;
-        int 					_serverFd;
-        std::vector<Client>		_clients;
-        std::vector<Channel>	_channels;
-		std::vector<pollfd>		_fds;
-		static bool				_signal; // static is accessable without instance
-		std::map<int, std::string> _clientBuffers;
+        int 						_port;
+        std::string 				_password;
+        int 						_serverFd;
+        std::vector<Client>			_clients;
+        std::vector<Channel>		_channels;
+		std::vector<pollfd>			_fds;
+		static bool					_signal; // static is accessable without instance
+		std::map<int, std::string>	_clientBuffers;
 
 		enum	Command {
 				KICK,
@@ -47,8 +48,16 @@ class Server {
 				FAIL
 		};
 
-		void	parser(std::string arg, std::vector<std::string> &params, char del);
-		bool	hasOpRights(int cfd, std::string channelName);
+		/*		GENERAL						*/
+
+		void			parser(std::string arg, std::vector<std::string> &params, char del);
+		bool			hasOpRights(int cfd, std::string channelName);
+		void			runCommand(int cfd, std::string arg, size_t *clientIndex);
+		bool			isUniqueNick(std::string nick);
+		Server::Command	identifyCommand(std::string *cmd);
+
+
+		/*		CLIENT REGISTRATION			*/
 
 		void	acceptNewClient();
 		void	processClientInput(size_t *clientIndex, int cfd);
@@ -56,18 +65,11 @@ class Server {
 		void	registerClient(int cfd, std::string arg, size_t *clientIndex);
 		void	processInputData(std::stringstream &ss, int cfd, size_t *clientIndex);
 		void	authenticate(Client &client, std::string arg, size_t *clientIndex);
-
 		void	registerPassword(Client& client, std::string arg, size_t *clientIndex);
         void	registerNickname(Client& client, std::string arg);
         void    registerUser(Client& client, std::string arg);
 
-		void	eraseClient(int cfd, size_t *clientIndex);
-		void	removeClientFromChannels(int cfd);
-		bool	isUniqueNick(std::string nick);
-
-		void	runCommand(int cfd, std::string arg, size_t *clientIndex);
-		void	nick(int cfd, std::string arg);
-		void	verifyNick(int cfd, std::string newNick);
+		/*		JOIN						*/
 
 		void	join(int cfd, std::string arg);
 		void	addNewChannel(int cfd, std::string channelName, std::string channelKey);
@@ -81,47 +83,68 @@ class Server {
 		bool	isValidName(std::string channel);
 		bool	isValidKey(std::string channelKey);
 
-		void	mode(int cfd, std::string arg);
-		void	setMode(int cfd, std::vector<std::string> &params);
-		bool	verifyParams(int cfd, std::vector<std::string> &params);
-		void	setInviteStatus(int cfd, Channel &channel, std::string mode);
-		void	setTopicRestriction(int cfd, Channel &channel, std::string mode);
-		void	setKey(int cfd, Channel &channel, std::vector<std::string> &params);
-		void	setClientLimit(int cfd, Channel &channel, std::vector<std::string> &params);
-		void	setOpRights(int cfd, std::vector<std::string> &params);
-		bool	isClient(std::string nick);
-		bool	getClient(std::string name, Client *client);
-		void	returnChannelMode(int cfd, Channel &channel);
+		/*		NICK						*/
+
+		void	nick(int cfd, std::string arg);
+		void	verifyNick(int cfd, std::string newNick);
+
+		/*		MODE						*/
+
+		void		mode(int cfd, std::string arg);
+		void		setMode(int cfd, std::vector<std::string> &params);
+		bool		verifyParams(int cfd, std::vector<std::string> &params);
+		void		setInviteStatus(int cfd, Channel &channel, std::string mode);
+		void		setTopicRestriction(int cfd, Channel &channel, std::string mode);
+		void		setKey(int cfd, Channel &channel, std::vector<std::string> &params);
+		void		setClientLimit(int cfd, Channel &channel, std::vector<std::string> &params);
+		void		setOpRights(int cfd, std::vector<std::string> &params);
+		bool		isClient(std::string nick);
+		bool		getClient(std::string name, Client *client);
+		void		returnChannelMode(int cfd, Channel &channel);
 		std::string	findChannel(Client &op, Client &newOp);
 		std::string	findCommonChannel(int cfd, std::string targetNick);
 
+		/*		PING						*/
+
 		void	pingMyPong(int cfd, std::string arg);
+
+		/*		PRIVMSG						*/
+
 		void	messages(int cfd, std::string arg);
-		Server::Command	identifyCommand(std::string *cmd);
 		void    sendToClient(int cfd, std::string dm, std::string recipient);
 		void    sendToChannel(int cfd, std::string dm, std::string recipient);
 		bool    checkClient(std::string name, Client *client);
 		bool    checkChannel(std::string name, Channel *channel);
 		bool    checkSender(int cfd, Client *client);
 
-		void	kickSomeone(int cfd, std::string arg);
-		bool	channelExist(const std::string& channelName);
-		bool	isUserInChannel(const std::string& channelName, int userFd);
-		int		getUserFdByNick(const std::string& nickName);
-		Channel* getChannelObj(const std::string& channelName); 
+		/*		KICK						*/
 
-		Client* getClientObjByFd(int fd);
+		void		kickSomeone(int cfd, std::string arg);
+		bool		channelExist(const std::string& channelName);
+		bool		isUserInChannel(const std::string& channelName, int userFd);
+		int			getUserFdByNick(const std::string& nickName);
+		Channel*	getChannelObj(const std::string& channelName); 
+		Client*		getClientObjByFd(int fd);
+
+		/*		INVITE						*/
 
 		void	inviteRandos(int cfd, std::string arg);
 		int		getUserFdbyNick(const std::string& nickName);
 		int		getClientIndex(int fd);
 		int		getChannelIndex(std::string name);
 
+		/*		TOPIC						*/
+
 		void    topic(int cfd, std::string arg);
 		void    changeTopic(Channel &channel, int cfd, std::string newTopic);
-		void	quit(int cfd, std::string arg, size_t *clientIndex);
 		void	notifyChannels(int cfd, std::string msg);
 		void	removeDeadChannels();
+
+		/*		QUIT						*/
+
+		void	quit(int cfd, std::string arg, size_t *clientIndex);
+		void	eraseClient(int cfd, size_t *clientIndex);
+		void	removeClientFromChannels(int cfd);
 
     public:
         Server(int port, std::string password);
@@ -129,8 +152,8 @@ class Server {
         Server(const Server& other);
         Server& operator=(const Server& other);
 
-        int		runServer();
-		void	setServerFd();
+        int			runServer();
+		void		setServerFd();
 
         std::string	getPassword() const {return _password;}
         int			getPort() const {return _port;}
@@ -140,6 +163,5 @@ class Server {
 		void		addChannel(const Channel &channel) {_channels.push_back(channel);}
 
 		static void setSignal(bool value);
-
 
 };

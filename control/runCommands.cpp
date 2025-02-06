@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../Server.hpp"
 
 Server::Command	Server::identifyCommand(std::string *cmd) {
 

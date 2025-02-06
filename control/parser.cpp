@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../Server.hpp"
 
 void    Server::parser(std::string arg, std::vector<std::string> &params, char del)
 {

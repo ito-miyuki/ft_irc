@@ -4,15 +4,16 @@ void	Server::verifyNick(int cfd, std::string newNick) {
 
 	std::regex	incorrect("^([#$:#&+%~,]\\S*|\\S*[,*.?!@ ]\\S*|\\+(q|a|o|h|v)\\S*)");
 
-	if (std::regex_match(newNick, incorrect)) {
+	if (newNick.empty() || std::regex_match(newNick, incorrect) || newNick.find(' ') != std::string::npos) {
 
 		std::string msg = ":ft_irc 432 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " :Erroneus nickname\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
+
 	} else {
 
 		if (isUniqueNick(newNick)) {
 
-			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " NICK " + newNick + "\r\n";
+			std::string msg = ":" + _clients.at(getClientIndex(cfd)).getNick() + "!~" + _clients.at(getClientIndex(cfd)).getUser() + "@" + _clients.at(getClientIndex(cfd)).getIPa() + " NICK " + newNick + "\r\n";
 
 			for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); std::advance(it, 1)) {
 				if ((*it).containSender(cfd)) {
@@ -21,6 +22,7 @@ void	Server::verifyNick(int cfd, std::string newNick) {
 			}
 			send(cfd, msg.c_str(), msg.length(), 0);
 			_clients.at(getClientIndex(cfd)).setNickname(newNick);
+
 		} else {
 
 			std::string msg = ":ft_irc 433 " + _clients.at(getClientIndex(cfd)).getNick() + " " + newNick + " \r\n";
@@ -44,6 +46,7 @@ void	Server::nick(int cfd, std::string arg) {
 			
 		} else if (_clients.at(getClientIndex(cfd)).getNick().compare(params.at(1)) == 0) {
 		} else {
+
 			verifyNick(cfd, params.at(1));
 		}
 	} else {

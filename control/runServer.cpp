@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../Server.hpp"
 
 static void handleSignal(int signal){
 	switch (signal) {
