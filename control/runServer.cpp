@@ -23,7 +23,6 @@ int Server::runServer() {
 	// handle signal here.
 	signal(SIGINT, handleSignal); // ctrl + c
 	signal(SIGQUIT, handleSignal); // 'ctrl + \'
-	signal(SIGTERM, handleSignal); // kill <PID>
 
 	setServerFd();
 	if (getServerFd() == -1) {
