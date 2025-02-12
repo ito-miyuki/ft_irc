@@ -59,7 +59,6 @@ void	Server::processClientInput(size_t *clientIndex, int cfd) {
 	int byteRead = recv(cfd, buffer, sizeof(buffer), 0);
 
 	if (byteRead <= 0) {
-		//std::cout << "Client disconnected: " << cfd << std::endl;
 		std::string msg = "ERROR :Connection timeout\r\n";
 		send(cfd, msg.c_str(), msg.length(), 0);
 		eraseClient(cfd, clientIndex);
