@@ -24,7 +24,6 @@ void	Server::registerPassword(Client& client, std::string arg, size_t *clientInd
 		} else	{
 			std::string msg = "ERROR: Incorrect password. Connection closed.\n";
 			send(client.getFd(), msg.c_str(), msg.length(), 0);
-			close(client.getFd());
 			std::cerr << "Client provided an incorrect password. Connection terminated." << std::endl;
 			eraseClient(client.getFd(), clientIndex);
 		}
